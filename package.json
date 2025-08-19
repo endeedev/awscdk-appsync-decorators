@@ -41,8 +41,6 @@
         "yalc": "1.0.0-pre.53"
     },
     "peerDependencies": {
-        "aws-cdk-lib": "^2.110.0",
-        "awscdk-appsync-utils": "~0.0.328",
-        "constructs": "^10.0.5"
+        "awscdk-appsync-utils": "~0.0.328"
     }
 }
