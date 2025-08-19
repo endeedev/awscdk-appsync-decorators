@@ -26,11 +26,11 @@ binder.bindSchema();
 
 The foundations of a schema are it's type definitions.
 
-> ### Scalar
+### Scalar
 
 The built-in scalar types can be accessed via the `Scalar` enum (e.g. `Scalar.ID`, `Scalar.AWS_DATE`).
 
-> ### Interface
+### Interface
 
 The `@InterfaceType()` decorator is attached to a class that defines the interface shape.
 
@@ -49,7 +49,7 @@ interface Node {
 }
 ```
 
-> ### Object
+### Object
 
 The `@ObjectType()` decorator is attached to a class that defines the object shape.
 
@@ -79,7 +79,7 @@ type FilmNode implements Node {
 }
 ```
 
-> ### Enum
+### Enum
 
 The `@EnumType()` decorator is attached to a class that defines the enum values.
 
@@ -104,7 +104,7 @@ enum Episode {
 }
 ```
 
-> ### Input
+### Input
 
 The `@InputType()` decorator is attached to a class that defines the input shape.
 
@@ -125,7 +125,7 @@ input Review {
 }
 ```
 
-> ### Union
+### Union
 
 The `@UnionType()` decorator is attached to a class that defines the union.
 
@@ -157,7 +157,7 @@ GraphQL
 union Search = Human | Droid | Starship
 ```
 
-> ### Args
+### Args
 
 The `@Args()` decorator is attached to a property and provides a class type that defines the argument names and types.
 
@@ -183,7 +183,7 @@ type Query {
 }
 ```
 
-> ### Modifiers
+### Modifiers
 
 Modifiers can be attached to properties to define when a value is a list or non-null.
 
