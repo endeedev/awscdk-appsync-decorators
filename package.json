@@ -3,12 +3,12 @@
     "version": "0.0.0",
     "license": "MIT",
     "scripts": {
-        "playground": "tsx ./playground/main.ts",
+        "playground": "cls && tsx ./playground/main.ts",
         "test": "cls && jest --verbose",
         "coverage": "cls && jest --coverage",
         "format": "prettier \"**/*.+(ts|js|json)\" --write",
         "lint": "eslint \"**/*.+(ts|js|json)\"",
-        "fix": "yarn format && yarn lint --fix"
+        "fix": "cls && yarn format && yarn lint --fix"
     },
     "dependencies": {
         "aws-cdk-lib": "2.172.0",
