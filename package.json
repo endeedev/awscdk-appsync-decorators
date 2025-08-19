@@ -1,0 +1,28 @@
+{
+    "name": "awscdk-appsync-decorators",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "playground": "tsx ./src/playground.ts",
+        "format": "prettier \"**/*.+(ts|js|json)\" --write",
+        "lint": "eslint \"**/*.+(ts|js|json)\"",
+        "fix": "yarn format && yarn lint --fix"
+    },
+    "dependencies": {
+        "aws-cdk-lib": "2.167.0",
+        "awscdk-appsync-utils": "0.0.579",
+        "constructs": "10.4.2",
+        "reflect-metadata": "0.2.2"
+    },
+    "devDependencies": {
+        "@eslint/js": "9.14.0",
+        "@types/node": "22.9.0",
+        "eslint": "9.14.0",
+        "eslint-plugin-simple-import-sort": "12.1.1",
+        "tsc": "2.0.4",
+        "tsx": "4.19.2",
+        "prettier": "3.3.3",
+        "typescript": "5.6.3",
+        "typescript-eslint": "8.14.0"
+    }
+}
