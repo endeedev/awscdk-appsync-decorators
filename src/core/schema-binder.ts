@@ -122,9 +122,9 @@ export class SchemaBinder {
     private createDirectives(typeInfo: TypeInfo, propertyInfo?: PropertyInfo): Directive[] {
         const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo, propertyInfo);
 
-        // Map each directive info the relevant directive type
+        // Map each directive info to the relevant directive type
         return directiveInfos.map((directiveInfo) => {
-            const { directiveId } = directiveInfo;
+            const { directiveId, context } = directiveInfo;
 
             const factory = this._directiveFactories[directiveId];
 
@@ -132,14 +132,14 @@ export class SchemaBinder {
                 throw new Error(`Unable to create directive of type '${directiveId}'.`);
             }
 
-            return factory(directiveInfo.context);
+            return factory(context);
         });
     }
 
     private createType(typeInfo: TypeInfo, modifierInfo: ModifierInfo): GraphqlType {
         const { typeId, definitionType } = typeInfo;
 
-        // Build scalar types separately
+        // Build the scalar types separately
         if (typeId === TYPE_ID.SCALAR) {
             return new GraphqlType(`${definitionType}` as TypeBase, {
                 ...modifierInfo,
@@ -164,7 +164,7 @@ export class SchemaBinder {
             const factory = this._intermediateTypeFactories[typeId];
 
             if (!factory) {
-                throw new Error(`Unable to create intermediate type '${typeId}'.`);
+                throw new Error(`Unable to create type '${typeId}'.`);
             }
 
             intermediateType = factory(typeInfo);
@@ -200,11 +200,13 @@ export class SchemaBinder {
     }
 
     private createCognitoDirective(context: DirectiveInfo['context']): Directive {
-        return Directive.cognito(...(context!.groups as string[]));
+        const groups = context!.groups as string[];
+        return Directive.cognito(...groups);
     }
 
     private createCustomDirective(context: DirectiveInfo['context']): Directive {
-        return Directive.custom(context!.statement as string);
+        const statement = context!.statement as string;
+        return Directive.custom(statement);
     }
 
     private createIamDirective(): Directive {
@@ -239,43 +241,43 @@ export class SchemaBinder {
     private createInputType(typeInfo: TypeInfo): InputType {
         const { typeName } = typeInfo;
 
-        // An input type requires a definition of fields and directives
-        const definition = this.createFields(typeInfo);
+        // An input type requires directives and a definition of fields
         const directives = this.createDirectives(typeInfo);
+        const definition = this.createFields(typeInfo);
 
         return new InputType(typeName, {
-            definition,
             directives,
+            definition,
         });
     }
 
     private createInterfaceType(typeInfo: TypeInfo): InterfaceType {
         const { typeName } = typeInfo;
 
-        // An interface type requires a definition of fields and directives
-        const definition = this.createFields(typeInfo);
+        // An interface type requires directives and a definition of fields
         const directives = this.createDirectives(typeInfo);
+        const definition = this.createFields(typeInfo);
 
         return new InterfaceType(typeName, {
-            definition,
             directives,
+            definition,
         });
     }
 
     private createObjectType(typeInfo: TypeInfo): ObjectType {
         const { typeName } = typeInfo;
 
-        // An object type requires a definition of fields and directives
-        const definition = this.createFields(typeInfo);
+        // An object type requires directives and a definition of fields
         const directives = this.createDirectives(typeInfo);
+        const definition = this.createFields(typeInfo);
 
         // An object type can also implement interfaces
         // Get any defined types and map to their intermediate types
         const typeInfos = TypeReflector.getMetadataTypeInfos(METADATA.TYPE.OBJECT_TYPES, typeInfo);
 
         return new ObjectType(typeName, {
-            definition,
             directives,
+            definition,
             interfaceTypes:
                 typeInfos.length === 0 ? undefined : typeInfos.map((typeInfo) => this.createIntermediateType(typeInfo)),
         });

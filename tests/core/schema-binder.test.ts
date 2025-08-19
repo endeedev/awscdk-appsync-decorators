@@ -12,7 +12,7 @@ import {
 } from 'awscdk-appsync-utils';
 
 import { Scalar, Type } from '@/common';
-import { LAMBDA_DIRECTIVE_STATEMENT } from '@/constants';
+import { LAMBDA_DIRECTIVE_STATEMENT, METADATA } from '@/constants';
 import { SchemaBinder } from '@/core';
 import {
     ApiKey,
@@ -129,6 +129,25 @@ describe('Core: Schema Binder', () => {
             }
 
             assertDirective(Query, Directive.oidc());
+        });
+
+        test('should throw if directive factory is not found', () => {
+            const directiveId = getName();
+
+            class Query {
+                prop = Scalar.ID;
+            }
+
+            const { binder } = createContext((binder) => {
+                binder.addQuery(Query);
+            });
+
+            // Override the property decorator metadata
+            Reflect.defineMetadata(METADATA.DIRECTIVE.IDS, [directiveId], Query.prototype, 'prop');
+
+            expect(() => binder.bindSchema()).toThrow(
+                new Error(`Unable to create directive of type '${directiveId}'.`),
+            );
         });
     });
 
@@ -348,6 +367,25 @@ describe('Core: Schema Binder', () => {
                     ],
                 }),
             );
+        });
+
+        test('should throw if type factory is not found', () => {
+            const typeId = getName();
+
+            class TestType {}
+
+            class Query {
+                prop = TestType;
+            }
+
+            const { binder } = createContext((binder) => {
+                binder.addQuery(Query);
+            });
+
+            // Override the property decorator metadata
+            Reflect.defineMetadata(METADATA.TYPE.ID, [typeId], TestType);
+
+            expect(() => binder.bindSchema()).toThrow(new Error(`Unable to create type '${typeId}'.`));
         });
 
         test('should create types once', () => {
