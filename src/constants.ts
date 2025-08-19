@@ -11,6 +11,11 @@ export const METADATA = {
         ID: 'metadata:type:id',
         NAME: 'metadata:type:name',
     },
+    MODIFIER: {
+        LIST: 'metadata:list',
+        REQUIRED: 'metadata:required',
+        REQUIRED_LIST: 'metadata:required:list',
+    },
     OBJECT: {
         TYPES: 'metadata:object:types',
     },
