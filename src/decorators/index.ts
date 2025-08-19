@@ -1,2 +1,4 @@
-export * from './modifiers';
+import 'reflect-metadata';
+
+export * from './common';
 export * from './types';

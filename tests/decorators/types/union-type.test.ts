@@ -1,10 +1,11 @@
 import { METADATA, TYPE_ID } from '@/constants';
 import { UnionType } from '@/decorators';
 
-const UNION_NAME = 'CustomTestUnion';
-
 class TestObject1 {}
 class TestObject2 {}
+
+const UNION_NAME = 'CustomTestUnion';
+const OBJECT_NAMES = [TestObject1.name, TestObject2.name].join(', ');
 
 describe('Decorator: Union Type', () => {
     describe('@UnionType()', () => {
@@ -61,7 +62,7 @@ describe('Decorator: Union Type', () => {
             expect(name).toBe(TestUnionTypeWithInterfaces.name);
         });
 
-        test(`should set '${METADATA.UNION.TYPES}' to [TestObject1, TestObject2]`, () => {
+        test(`should set '${METADATA.UNION.TYPES}' to [${OBJECT_NAMES}]`, () => {
             const types = Reflect.getMetadata(METADATA.UNION.TYPES, TestUnionTypeWithInterfaces);
             expect(types).toEqual([TestObject1, TestObject2]);
         });
@@ -81,7 +82,7 @@ describe('Decorator: Union Type', () => {
             expect(name).toBe(UNION_NAME);
         });
 
-        test(`should set '${METADATA.UNION.TYPES}' to [TestObject1, TestObject2]`, () => {
+        test(`should set '${METADATA.UNION.TYPES}' to [${OBJECT_NAMES}]`, () => {
             const types = Reflect.getMetadata(METADATA.UNION.TYPES, TestUnionTypeWithNameAndInterfaces);
             expect(types).toEqual([TestObject1, TestObject2]);
         });

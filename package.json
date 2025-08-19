@@ -3,6 +3,7 @@
     "version": "0.0.0",
     "license": "MIT",
     "scripts": {
+        "playground": "tsx ./playground/main.ts",
         "test": "jest",
         "format": "prettier \"**/*.+(ts|js|json)\" --write",
         "lint": "eslint \"**/*.+(ts|js|json)\"",

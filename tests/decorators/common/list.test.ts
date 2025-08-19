@@ -8,8 +8,8 @@ describe('Decorator: List', () => {
             prop = 0;
         }
 
-        test(`should set '${METADATA.MODIFIER.LIST}' to true`, () => {
-            const value = Reflect.getMetadata(METADATA.MODIFIER.LIST, SchemaType.prototype, 'prop');
+        test(`should set '${METADATA.COMMON.LIST}' to true`, () => {
+            const value = Reflect.getMetadata(METADATA.COMMON.LIST, SchemaType.prototype, 'prop');
             expect(value).toBe(true);
         });
     });

@@ -1,10 +1,11 @@
 import { METADATA, TYPE_ID } from '@/constants';
 import { ObjectType } from '@/decorators';
 
-const OBJECT_NAME = 'CustomTestObject';
-
 class TestInterface1 {}
 class TestInterface2 {}
+
+const OBJECT_NAME = 'CustomTestObject';
+const INTERFACE_NAMES = [TestInterface1.name, TestInterface2.name].join(', ');
 
 describe('Decorator: Object Type', () => {
     describe('@ObjectType()', () => {
@@ -61,7 +62,7 @@ describe('Decorator: Object Type', () => {
             expect(name).toBe(TestObjectTypeWithInterfaces.name);
         });
 
-        test(`should set '${METADATA.OBJECT.TYPES}' to [TestInterface1, TestInterface2]`, () => {
+        test(`should set '${METADATA.OBJECT.TYPES}' to [${INTERFACE_NAMES}]`, () => {
             const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestObjectTypeWithInterfaces);
             expect(types).toEqual([TestInterface1, TestInterface2]);
         });
@@ -81,7 +82,7 @@ describe('Decorator: Object Type', () => {
             expect(name).toBe(OBJECT_NAME);
         });
 
-        test(`should set '${METADATA.OBJECT.TYPES}' to [TestInterface1, TestInterface2]`, () => {
+        test(`should set '${METADATA.OBJECT.TYPES}' to [${INTERFACE_NAMES}]`, () => {
             const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestObjectTypeWithNameAndInterfaces);
             expect(types).toEqual([TestInterface1, TestInterface2]);
         });

@@ -1,4 +1,4 @@
-import { Required } from '@/decorators';
+import { Arguments, Required } from '@/decorators';
 import { Scalar } from '@/types';
 
 import { Beer } from './schema/beer';
@@ -15,9 +15,9 @@ class BeersArgs {
 }
 
 export class Query {
-    @Args(BeerArgs)
+    @Arguments(BeerArgs)
     beer = Beer;
 
-    @Args(BeersArgs)
+    @Arguments(BeersArgs)
     beers = [Beer];
 }

@@ -8,8 +8,8 @@ describe('Decorator: Required', () => {
             prop = 0;
         }
 
-        test(`should set '${METADATA.MODIFIER.REQUIRED}' to true`, () => {
-            const value = Reflect.getMetadata(METADATA.MODIFIER.REQUIRED, SchemaType.prototype, 'prop');
+        test(`should set '${METADATA.COMMON.REQUIRED}' to true`, () => {
+            const value = Reflect.getMetadata(METADATA.COMMON.REQUIRED, SchemaType.prototype, 'prop');
             expect(value).toBe(true);
         });
     });

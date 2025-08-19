@@ -11,7 +11,8 @@ export const METADATA = {
         ID: 'metadata:type:id',
         NAME: 'metadata:type:name',
     },
-    MODIFIER: {
+    COMMON: {
+        ARGUMENTS: 'metadata:arguments',
         LIST: 'metadata:list',
         REQUIRED: 'metadata:required',
         REQUIRED_LIST: 'metadata:required:list',

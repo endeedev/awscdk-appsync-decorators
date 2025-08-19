@@ -8,8 +8,8 @@ describe('Decorator: Required List', () => {
             prop = 0;
         }
 
-        test(`should set '${METADATA.MODIFIER.REQUIRED_LIST}' to true`, () => {
-            const value = Reflect.getMetadata(METADATA.MODIFIER.REQUIRED_LIST, SchemaType.prototype, 'prop');
+        test(`should set '${METADATA.COMMON.REQUIRED_LIST}' to true`, () => {
+            const value = Reflect.getMetadata(METADATA.COMMON.REQUIRED_LIST, SchemaType.prototype, 'prop');
             expect(value).toBe(true);
         });
     });
