@@ -1,6 +1,6 @@
 {
     "name": "awscdk-appsync-decorators",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "Decorators for creating appsync apis using aws-cdk",
     "license": "MIT",
     "keywords": [
