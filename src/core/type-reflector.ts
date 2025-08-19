@@ -1,5 +1,7 @@
-import { ArgInfo, FieldInfo, ModifierInfo, PropertyInfo, Scalar, Type, TypeInfo } from '@/common';
-import { METADATA, TYPE_ID } from '@/constants';
+import { ArgInfo, DirectiveInfo, FieldInfo, ModifierInfo, PropertyInfo, Scalar, Type, TypeInfo } from '@/common';
+import { DIRECTIVE_ID, METADATA, TYPE_ID } from '@/constants';
+
+type DirectiveFactory = (typeInfo: TypeInfo, propertyInfo?: PropertyInfo) => Record<string, unknown>;
 
 interface ReflectedProperty {
     readonly propertyInfo: PropertyInfo;
@@ -9,6 +11,13 @@ interface ReflectedProperty {
 const SCALARS = Object.values(Scalar);
 
 export class TypeReflector {
+    private static _directiveFactories: Record<string, DirectiveFactory> = {
+        [DIRECTIVE_ID.COGNITO]: (typeInfo, propertyInfo) =>
+            this.getDirectiveContext('groups', METADATA.DIRECTIVE.COGNITO_GROUPS, typeInfo, propertyInfo),
+        [DIRECTIVE_ID.CUSTOM]: (typeInfo, propertyInfo) =>
+            this.getDirectiveContext('statement', METADATA.DIRECTIVE.CUSTOM_STATEMENT, typeInfo, propertyInfo),
+    };
+
     static getTypeInfo(type: Scalar | Type<object>): TypeInfo {
         // Define the type info if the type is a scalar
         if (this.isScalar(`${type}`)) {
@@ -57,9 +66,55 @@ export class TypeReflector {
         const { definitionType } = typeInfo;
 
         // Get the types for the provided metadata key
-        const types: Type<object>[] = Reflect.getMetadata(metadataKey, definitionType);
+        const types = Reflect.getMetadata(metadataKey, definitionType) as Type<object>[];
 
         return types.map((type) => this.getTypeInfo(type));
+    }
+
+    static getMetadataDirectiveInfos(typeInfo: TypeInfo, propertyInfo?: PropertyInfo): DirectiveInfo[] {
+        const { definitionType } = typeInfo;
+
+        // Get the directives for type or property
+        const directiveIds = propertyInfo
+            ? (Reflect.getMetadata(
+                  METADATA.DIRECTIVE.IDS,
+                  definitionType.prototype,
+                  propertyInfo.propertyName,
+              ) as string[])
+            : (Reflect.getMetadata(METADATA.DIRECTIVE.IDS, definitionType) as string[]);
+
+        return directiveIds.map((directiveId) => {
+            const factory = this._directiveFactories[directiveId];
+            const context = factory ? factory(typeInfo, propertyInfo) : undefined;
+
+            return {
+                directiveId,
+                context,
+            };
+        });
+    }
+
+    private static getDirectiveContext(
+        contextKey: string,
+        metadataKey: string,
+        typeInfo: TypeInfo,
+        propertyInfo?: PropertyInfo,
+    ): Record<string, unknown> {
+        const { definitionType } = typeInfo;
+
+        // Get the context values from the type or property metadata
+        if (propertyInfo) {
+            const { prototype } = definitionType;
+            const { propertyName } = propertyInfo;
+
+            return {
+                [contextKey]: Reflect.getMetadata(metadataKey, prototype, propertyName),
+            };
+        }
+
+        return {
+            [contextKey]: Reflect.getMetadata(metadataKey, definitionType),
+        };
     }
 
     private static getArgInfos(propertyInfo: PropertyInfo): ArgInfo[] {
@@ -110,7 +165,6 @@ export class TypeReflector {
 
         if (isArray) {
             const [first] = Array.from(value);
-
             returnType = first;
         }
 

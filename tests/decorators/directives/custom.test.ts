@@ -13,7 +13,7 @@ describe('Decorator: Custom', () => {
             prop = 0;
         }
 
-        test(`should set '${METADATA.DIRECTIVE.IDS}' to [${DIRECTIVE_ID.CUSTOM}] for class`, () => {
+        test(`should set '${METADATA.DIRECTIVE.IDS}' to [${DIRECTIVE_ID.CUSTOM}] for type`, () => {
             const ids = Reflect.getMetadata(METADATA.DIRECTIVE.IDS, TestType);
 
             expect(ids).toHaveLength(1);
@@ -27,7 +27,7 @@ describe('Decorator: Custom', () => {
             expect(ids).toContain(DIRECTIVE_ID.CUSTOM);
         });
 
-        test(`should set '${METADATA.DIRECTIVE.CUSTOM_STATEMENT}' to '${STATEMENT}' for class`, () => {
+        test(`should set '${METADATA.DIRECTIVE.CUSTOM_STATEMENT}' to '${STATEMENT}' for type`, () => {
             const statement = Reflect.getMetadata(METADATA.DIRECTIVE.CUSTOM_STATEMENT, TestType);
             expect(statement).toBe(STATEMENT);
         });

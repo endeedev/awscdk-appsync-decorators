@@ -1,9 +1,22 @@
-import { Scalar, Type } from '@/common';
-import { METADATA, TYPE_ID } from '@/constants';
+import { DirectiveInfo, Scalar, Type } from '@/common';
+import { DIRECTIVE_ID, METADATA, TYPE_ID } from '@/constants';
 import { TypeReflector } from '@/core';
-import { Args, List, ObjectType, Required, RequiredList, UnionType } from '@/decorators';
+import {
+    ApiKey,
+    Args,
+    Cognito,
+    Custom,
+    Iam,
+    Lambda,
+    List,
+    ObjectType,
+    Oidc,
+    Required,
+    RequiredList,
+    UnionType,
+} from '@/decorators';
 
-import { getName, getScalar, getTypeInfos } from '../helpers';
+import { getName, getNames, getScalar, getTypeInfos } from '../helpers';
 
 describe('Core: Type Reflector', () => {
     describe('getTypeInfo(scalar)', () => {
@@ -286,7 +299,7 @@ describe('Core: Type Reflector', () => {
             class TestType {}
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METADATA.OBJECT.TYPES);
+            const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METADATA.TYPE.OBJECT_TYPES);
 
             expect(typeInfos).toEqual(TYPE_INFOS);
         });
@@ -296,9 +309,64 @@ describe('Core: Type Reflector', () => {
             class TestType {}
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METADATA.UNION.TYPES);
+            const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METADATA.TYPE.UNION_TYPES);
 
             expect(typeInfos).toEqual(TYPE_INFOS);
+        });
+    });
+
+    describe('getMetadataDirectiveInfos(typeInfo, propertyInfo)', () => {
+        test(`should return directive infos for type`, () => {
+            const GROUP = getName();
+            const GROUPS = getNames();
+            const STATEMENT = getName();
+
+            const assertDirective = (
+                directiveId: string,
+                directiveInfos: DirectiveInfo[],
+                context?: Record<string, unknown>,
+            ) => {
+                const directiveInfo = directiveInfos.find(({ directiveId: id }) => id === directiveId);
+
+                expect(directiveInfo).not.toBeUndefined();
+                expect(directiveInfo?.context).toBe(context);
+            };
+
+            @ApiKey()
+            @Cognito(GROUP, ...GROUPS)
+            @Custom(STATEMENT)
+            @Iam()
+            @Lambda()
+            @Oidc()
+            class TestType {
+                @ApiKey()
+                @Cognito(GROUP)
+                @Custom(STATEMENT)
+                @Iam()
+                @Lambda()
+                @Oidc()
+                prop = 0;
+            }
+
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo, {
+                propertyName: 'prop',
+                returnTypeInfo: typeInfo,
+                declaringTypeInfo: typeInfo,
+            });
+
+            assertDirective(DIRECTIVE_ID.API_KEY, directiveInfos);
+            assertDirective(DIRECTIVE_ID.IAM, directiveInfos);
+            assertDirective(DIRECTIVE_ID.LAMBDA, directiveInfos);
+            assertDirective(DIRECTIVE_ID.OIDC, directiveInfos);
+
+            assertDirective(DIRECTIVE_ID.COGNITO, directiveInfos, {
+                groups: [GROUP, ...GROUPS],
+            });
+
+            assertDirective(DIRECTIVE_ID.CUSTOM, directiveInfos, {
+                statement: STATEMENT,
+            });
         });
     });
 });

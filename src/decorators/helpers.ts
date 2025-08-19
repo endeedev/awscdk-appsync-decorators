@@ -48,7 +48,7 @@ export const defineDirectiveMetadata = (
 ) => {
     const [target, propertyKey] = args;
 
-    // Define the directive id metadata - can be class or property
+    // Define the directive id metadata - can be type or property
     if (propertyKey) {
         const directiveIds = mergePropertyDirectives(directiveId, target as Function, propertyKey as string | symbol);
         Reflect.defineMetadata(

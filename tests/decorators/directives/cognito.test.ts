@@ -17,7 +17,7 @@ describe('Decorator: Cognito', () => {
             prop = 0;
         }
 
-        test(`should set '${METADATA.DIRECTIVE.IDS}' to [${DIRECTIVE_ID.COGNITO}, ${DIRECTIVE_ID.CUSTOM}] for class`, () => {
+        test(`should set '${METADATA.DIRECTIVE.IDS}' to [${DIRECTIVE_ID.COGNITO}, ${DIRECTIVE_ID.CUSTOM}] for type`, () => {
             const ids = Reflect.getMetadata(METADATA.DIRECTIVE.IDS, TestType);
 
             expect(ids).toHaveLength(2);
@@ -33,7 +33,7 @@ describe('Decorator: Cognito', () => {
             expect(ids).toContain(DIRECTIVE_ID.CUSTOM);
         });
 
-        test(`should set '${METADATA.DIRECTIVE.COGNITO_GROUPS}' to [${GROUP_NAMES}] for class`, () => {
+        test(`should set '${METADATA.DIRECTIVE.COGNITO_GROUPS}' to [${GROUP_NAMES}] for type`, () => {
             const groups = Reflect.getMetadata(METADATA.DIRECTIVE.COGNITO_GROUPS, TestType);
             expect(groups).toEqual([GROUP, ...GROUPS]);
         });

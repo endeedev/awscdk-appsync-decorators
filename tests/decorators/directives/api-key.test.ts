@@ -11,7 +11,7 @@ describe('Decorator: API Key', () => {
             prop = 0;
         }
 
-        test(`should set '${METADATA.DIRECTIVE.IDS}' to [${DIRECTIVE_ID.API_KEY}, ${DIRECTIVE_ID.CUSTOM}] for class`, () => {
+        test(`should set '${METADATA.DIRECTIVE.IDS}' to [${DIRECTIVE_ID.API_KEY}, ${DIRECTIVE_ID.CUSTOM}] for type`, () => {
             const ids = Reflect.getMetadata(METADATA.DIRECTIVE.IDS, TestType);
 
             expect(ids).toHaveLength(2);
