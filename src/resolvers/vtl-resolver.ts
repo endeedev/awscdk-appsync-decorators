@@ -2,9 +2,9 @@ import { MappingTemplate } from 'aws-cdk-lib/aws-appsync';
 
 import { RESOLVER_RUNTIME } from '@/constants';
 
-import { OperationBase } from './operation-base';
+import { ResolverBase } from './resolver-base';
 
-export abstract class VtlOperation extends OperationBase {
+export abstract class VtlResolver extends ResolverBase {
     abstract readonly requestMappingTemplate: MappingTemplate;
     abstract readonly responseMappingTemplate: MappingTemplate;
 

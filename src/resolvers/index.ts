@@ -1,3 +1,3 @@
-export * from './js-operation';
-export * from './operation-base';
-export * from './vtl-operation';
+export * from './js-resolver';
+export * from './resolver-base';
+export * from './vtl-resolver';

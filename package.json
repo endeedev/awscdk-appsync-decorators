@@ -3,16 +3,15 @@
     "version": "0.0.0",
     "license": "MIT",
     "scripts": {
-        "playground": "cls && tsx ./playground/main.ts",
-        "test": "cls && jest --verbose",
-        "coverage": "cls && jest --coverage",
+        "test": "jest --verbose",
+        "coverage": "jest --coverage",
         "format": "prettier \"**/*.+(ts|js|json)\" --write",
         "lint": "eslint \"**/*.+(ts|js|json)\"",
-        "fix": "cls && yarn format && yarn lint --fix"
+        "fix": "yarn format && yarn lint --fix"
     },
     "dependencies": {
         "aws-cdk-lib": "2.173.2",
-        "awscdk-appsync-utils": "0.0.609",
+        "awscdk-appsync-utils": "0.0.611",
         "constructs": "10.4.2",
         "reflect-metadata": "0.2.2"
     },

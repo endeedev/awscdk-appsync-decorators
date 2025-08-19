@@ -4,6 +4,9 @@ const globals = require('globals');
 const tseslint = require('typescript-eslint');
 
 module.exports = tseslint.config(
+    {
+        ignores: ['**/dist/**'],
+    },
     eslint.configs.recommended,
     ...tseslint.configs.recommended,
     ...tseslint.configs.stylistic,

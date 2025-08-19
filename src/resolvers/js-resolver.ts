@@ -2,9 +2,9 @@ import { Code } from 'aws-cdk-lib/aws-appsync';
 
 import { RESOLVER_RUNTIME } from '@/constants';
 
-import { OperationBase } from './operation-base';
+import { ResolverBase } from './resolver-base';
 
-export abstract class JsOperation extends OperationBase {
+export abstract class JsResolver extends ResolverBase {
     abstract readonly code: Code;
 
     constructor() {

@@ -3,9 +3,11 @@ import { TypeStore } from '@/core';
 import { getName } from '../helpers';
 
 describe('Core: Type Store', () => {
-    test(`should register and return item`, () => {
+    test('should register and return item', () => {
         const NAME = getName();
-        const OBJECT = {};
+        const OBJECT = {
+            prop: NAME,
+        };
 
         const store = new TypeStore<object>();
 

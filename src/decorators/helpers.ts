@@ -62,7 +62,7 @@ export const defineDirectiveMetadata = (
         Reflect.defineMetadata(METADATA.DIRECTIVE.IDS, directiveIds, target as Function);
     }
 
-    // If callback exists, then call it for any extra metadata needed
+    // If a callback exists, then call it for any extra metadata needed
     if (callback) {
         callback(target as Function, propertyKey as string | symbol);
     }
