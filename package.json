@@ -1,6 +1,6 @@
 {
     "name": "awscdk-appsync-decorators",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "description": "Decorators for creating appsync apis using aws-cdk",
     "license": "MIT",
     "types": "dist/index.d.ts",
@@ -9,8 +9,9 @@
         "dist/*"
     ],
     "scripts": {
-        "build": "tsup && yarn version patch",
-        "build:dev": "tsup && yalc publish",
+        "build": "tsup",
+        "build:dev": "yarn build && yalc publish",
+        "build:bump": "yarn build && yarn version --patch",
         "test": "jest --verbose",
         "coverage": "jest --coverage",
         "format": "prettier \"**/*.+(ts|js|json)\" --write",
@@ -23,6 +24,7 @@
     "devDependencies": {
         "@eslint/js": "9.17.0",
         "@faker-js/faker": "9.3.0",
+        "@swc/core": "1.10.4",
         "@types/jest": "29.5.14",
         "@types/node": "22.10.2",
         "aws-cdk-lib": "2.173.4",
