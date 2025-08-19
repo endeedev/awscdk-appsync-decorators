@@ -1,15 +1,14 @@
 import { Stack } from 'aws-cdk-lib';
-import { Definition, GraphqlApi } from 'aws-cdk-lib/aws-appsync';
+import { AppsyncFunction, Code, Definition, GraphqlApi, MappingTemplate } from 'aws-cdk-lib/aws-appsync';
 import { writeFileSync } from 'fs';
 
 import { Scalar } from '@/common';
 import { SchemaBinder } from '@/core';
 import { Args, Required, Resolver } from '@/decorators';
 
-import { DATABASE_DATA_SOURCE, SEARCH_DATA_SOURCE } from './constants';
-import { BeerOperation } from './resolvers/beer-operation';
-import { BeersOperation } from './resolvers/beers-operation';
-import { SearchOperation } from './resolvers/search-operation';
+import { BEERS_FUNCTION, DATABASE_DATA_SOURCE, SEARCH_DATA_SOURCE, SEARCH_FUNCTION } from './constants';
+import { BeerResolver } from './resolvers/beer-resolver';
+import { BeersResolver } from './resolvers/beers-resolver';
 import { Beer } from './schema/beer';
 import { Filters } from './schema/filters';
 
@@ -25,11 +24,11 @@ class BeersArgs {
 
 export class Query {
     @Args(BeerArgs)
-    @Resolver(BeerOperation)
+    @Resolver(BeerResolver)
     beer = Beer;
 
     @Args(BeersArgs)
-    @Resolver(SearchOperation, BeersOperation)
+    @Resolver(BeersResolver, SEARCH_FUNCTION, BEERS_FUNCTION)
     beers = [Beer];
 }
 
@@ -42,14 +41,29 @@ const api = new GraphqlApi(stack, 'Api', {
 });
 
 // Create the data source constucts
-const databaseDataSource = api.addNoneDataSource(DATABASE_DATA_SOURCE);
 const searchDataSource = api.addNoneDataSource(SEARCH_DATA_SOURCE);
+const databaseDataSource = api.addNoneDataSource(DATABASE_DATA_SOURCE);
+
+// Create any pipeline functions
+const searchFunction = new AppsyncFunction(stack, SEARCH_FUNCTION, {
+    api,
+    name: SEARCH_FUNCTION,
+    description: SEARCH_FUNCTION,
+    dataSource: searchDataSource,
+    code: Code.fromInline('// CODE'),
+});
+
+const beersFunction = new AppsyncFunction(stack, BEERS_FUNCTION, {
+    api,
+    name: BEERS_FUNCTION,
+    description: BEERS_FUNCTION,
+    dataSource: databaseDataSource,
+    requestMappingTemplate: MappingTemplate.fromString('# REQUEST'),
+    responseMappingTemplate: MappingTemplate.fromString('# RESPONSE'),
+});
 
 // Bind the schema
 binder.addQuery(Query);
-
-binder.addDataSource(databaseDataSource);
-binder.addDataSource(searchDataSource);
 
 binder.bindSchema();
 

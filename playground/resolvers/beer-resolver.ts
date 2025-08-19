@@ -4,7 +4,7 @@ import { JsOperation } from '@/resolvers';
 
 import { DATABASE_DATA_SOURCE } from '../constants';
 
-export class BeerOperation extends JsOperation {
+export class BeerResolver extends JsOperation {
     dataSourceName = DATABASE_DATA_SOURCE;
     code = Code.fromInline('// Get single beer');
 }
