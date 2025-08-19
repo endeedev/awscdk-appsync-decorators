@@ -1,4 +1,4 @@
-import { Type } from "@/common";
+import { Type } from '@/common';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export const getTypeContext = (target: Function, ...args: unknown[]) => {
@@ -20,6 +20,6 @@ export const getTypeContext = (target: Function, ...args: unknown[]) => {
 
     return {
         name,
-        types
-    }
+        types,
+    };
 };

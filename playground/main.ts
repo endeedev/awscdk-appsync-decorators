@@ -1,5 +1,6 @@
 import { Scalar } from '@/common';
-import { Arguments, Required } from '@/decorators';
+import { SchemaBuilder } from '@/core';
+import { Args, Required } from '@/decorators';
 
 import { Beer } from './schema/beer';
 import { Filters } from './schema/filters';
@@ -15,9 +16,16 @@ class BeersArgs {
 }
 
 export class Query {
-    @Arguments(BeerArgs)
+    @Args(BeerArgs)
     beer = Beer;
 
-    @Arguments(BeersArgs)
+    @Args(BeersArgs)
     beers = [Beer];
 }
+
+// Build the schema
+const schema = SchemaBuilder.buildSchema({
+    query: Query,
+});
+
+console.log(JSON.stringify(schema, undefined, 4));

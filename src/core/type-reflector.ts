@@ -2,8 +2,8 @@ import { ArgInfo, FieldInfo, ModifierInfo, PropertyInfo, Scalar, Type, TypeInfo 
 import { METADATA, TYPE_ID } from '@/constants';
 
 interface ReflectedProperty {
-    readonly property: PropertyInfo;
-    readonly modifiers: ModifierInfo;
+    readonly propertyInfo: PropertyInfo;
+    readonly modifierInfo: ModifierInfo;
 }
 
 const SCALARS = Object.values(Scalar);
@@ -19,7 +19,7 @@ export class TypeReflector {
             };
         }
 
-        // Otherwise reflect the type for type metadata
+        // Otherwise reflect the type metadata
         const typeId = Reflect.getMetadata(METADATA.TYPE.ID, type);
         const typeName = Reflect.getMetadata(METADATA.TYPE.NAME, type);
 
@@ -30,64 +30,74 @@ export class TypeReflector {
         };
     }
 
-    static getFieldInfos(type: TypeInfo): FieldInfo[] {
-        const { definitionType } = type;
+    static getFieldInfos(typeInfo: TypeInfo): FieldInfo[] {
+        const { definitionType } = typeInfo;
 
-        const fields: FieldInfo[] = [];
         const instance = new definitionType();
 
         // Reflect each property of the provided type
+        const fieldInfos: FieldInfo[] = [];
+
         for (const [name, value] of Object.entries(instance)) {
-            const { property, modifiers } = this.reflectProperty(type, name, value);
+            const { propertyInfo, modifierInfo } = this.reflectProperty(typeInfo, name, value);
 
-            const args = this.getArgInfos(property);
+            const argInfos = this.getArgInfos(propertyInfo);
 
-            fields.push({
-                property,
-                args,
-                modifiers,
+            fieldInfos.push({
+                propertyInfo,
+                modifierInfo,
+                argInfos,
             });
         }
 
-        return fields;
+        return fieldInfos;
     }
 
-    private static getArgInfos(property: PropertyInfo): ArgInfo[] {
+    static getMetadataTypeInfos(typeInfo: TypeInfo, metadataKey: string): TypeInfo[] {
+        const { definitionType } = typeInfo;
+
+        // Get the types for the provided metadata key
+        const types: Type<object>[] = Reflect.getMetadata(metadataKey, definitionType);
+
+        return types.map((type) => this.getTypeInfo(type));
+    }
+
+    private static getArgInfos(propertyInfo: PropertyInfo): ArgInfo[] {
         const {
             propertyName,
-            declaringType: {
+            declaringTypeInfo: {
                 definitionType: { prototype },
             },
-        } = property;
+        } = propertyInfo;
 
         // Get the type defined by the args decorator
         const argsType = Reflect.getMetadata(METADATA.COMMON.ARGS, prototype, propertyName);
 
-        const args: ArgInfo[] = [];
+        // If defined, then reflect each property of the provided args type
+        const argInfos: ArgInfo[] = [];
 
-        // If defined, then reflect each property of the provided arg type
         if (argsType) {
             const instance = new argsType();
 
-            const type = this.getTypeInfo(argsType);
-            
-            for (const [name, value] of Object.entries(instance)) {
-                const { property, modifiers } = this.reflectProperty(type, name, value);
+            const typeInfo = this.getTypeInfo(argsType);
 
-                args.push({
-                    property,
-                    modifiers,
+            for (const [name, value] of Object.entries(instance)) {
+                const { propertyInfo, modifierInfo } = this.reflectProperty(typeInfo, name, value);
+
+                argInfos.push({
+                    propertyInfo,
+                    modifierInfo,
                 });
             }
         }
 
-        return args;
+        return argInfos;
     }
 
-    private static reflectProperty(type: TypeInfo, name: string, value: unknown): ReflectedProperty {
+    private static reflectProperty(typeInfo: TypeInfo, name: string, value: unknown): ReflectedProperty {
         const {
             definitionType: { prototype },
-        } = type;
+        } = typeInfo;
 
         // Determine the property setup
         const isArray = Array.isArray(value);
@@ -95,21 +105,22 @@ export class TypeReflector {
         const isRequired = Reflect.hasMetadata(METADATA.COMMON.REQUIRED, prototype, name);
         const isRequiredList = Reflect.hasMetadata(METADATA.COMMON.REQUIRED_LIST, prototype, name);
 
-        // If the value is an array take the first element as the property type
-        let propertyType = value;
+        // If the value is an array take the first element as the return type
+        let returnType = value;
 
         if (isArray) {
             const [first] = Array.from(value);
-            propertyType = first;
+
+            returnType = first;
         }
 
         return {
-            property: {
-                propertyType: this.getTypeInfo(propertyType as Type<object>),
+            propertyInfo: {
                 propertyName: name,
-                declaringType: type,
+                returnTypeInfo: this.getTypeInfo(returnType as Type<object>),
+                declaringTypeInfo: typeInfo,
             },
-            modifiers: {
+            modifierInfo: {
                 isList: isArray || isList || isRequiredList,
                 isRequired,
                 isRequiredList,

@@ -3,7 +3,7 @@ import { ModifierInfo } from './modifier-info';
 import { PropertyInfo } from './property-info';
 
 export interface FieldInfo {
-    readonly property: PropertyInfo;
-    readonly args: ArgInfo[];
-    readonly modifiers: ModifierInfo;
+    readonly propertyInfo: PropertyInfo;
+    readonly modifierInfo: ModifierInfo;
+    readonly argInfos: ArgInfo[];
 }

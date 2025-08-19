@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker';
 
 import { Scalar, Type } from '@/common';
-import { TYPE_ID } from '@/constants';
+import { METADATA, TYPE_ID } from '@/constants';
 import { TypeReflector } from '@/core';
-import { Args, List, ObjectType, Required, RequiredList } from '@/decorators';
+import { Args, List, ObjectType, Required, RequiredList, UnionType } from '@/decorators';
 
 describe('Core: Type Reflector', () => {
     describe('getTypeInfo(scalar)', () => {
@@ -42,7 +42,7 @@ describe('Core: Type Reflector', () => {
         });
     });
 
-    describe('getFieldInfos(type)', () => {
+    describe('getFieldInfos(typeInfo)', () => {
         const getFieldInfo = (type: Type<object>) => {
             const typeInfo = TypeReflector.getTypeInfo(type);
             const fieldInfos = TypeReflector.getFieldInfos(typeInfo);
@@ -64,10 +64,10 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const { typeInfo, fieldInfo } = getFieldInfo(TestType);
-                expect(fieldInfo.property).toEqual({
-                    propertyType: TypeReflector.getTypeInfo(Scalar.ID),
+                expect(fieldInfo.propertyInfo).toEqual({
                     propertyName: 'prop',
-                    declaringType: typeInfo,
+                    returnTypeInfo: TypeReflector.getTypeInfo(Scalar.ID),
+                    declaringTypeInfo: typeInfo,
                 });
             });
 
@@ -79,7 +79,7 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const { fieldInfo } = getFieldInfo(TestType);
-                expect(fieldInfo.modifiers).toEqual({
+                expect(fieldInfo.modifierInfo).toEqual({
                     isList: true,
                     isRequired: false,
                     isRequiredList: false,
@@ -94,7 +94,7 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const { fieldInfo } = getFieldInfo(TestType);
-                expect(fieldInfo.modifiers).toEqual({
+                expect(fieldInfo.modifierInfo).toEqual({
                     isList: true,
                     isRequired: false,
                     isRequiredList: true,
@@ -108,7 +108,7 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const { fieldInfo } = getFieldInfo(TestType);
-                expect(fieldInfo.modifiers).toEqual({
+                expect(fieldInfo.modifierInfo).toEqual({
                     isList: true,
                     isRequired: false,
                     isRequiredList: false,
@@ -123,7 +123,7 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const { fieldInfo } = getFieldInfo(TestType);
-                expect(fieldInfo.modifiers).toEqual({
+                expect(fieldInfo.modifierInfo).toEqual({
                     isList: false,
                     isRequired: true,
                     isRequiredList: false,
@@ -138,7 +138,7 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const { fieldInfo } = getFieldInfo(TestType);
-                expect(fieldInfo.modifiers).toEqual({
+                expect(fieldInfo.modifierInfo).toEqual({
                     isList: true,
                     isRequired: false,
                     isRequiredList: true,
@@ -150,8 +150,8 @@ describe('Core: Type Reflector', () => {
             const getArgInfo = (type: Type<object>) => {
                 const { fieldInfo } = getFieldInfo(type);
 
-                const [first] = fieldInfo.args;
-                expect(fieldInfo.args).toHaveLength(1);
+                const [first] = fieldInfo.argInfos;
+                expect(fieldInfo.argInfos).toHaveLength(1);
 
                 return first;
             };
@@ -168,10 +168,10 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const argInfo = getArgInfo(TestType);
-                expect(argInfo.property).toEqual({
-                    propertyType: TypeReflector.getTypeInfo(Scalar.STRING),
+                expect(argInfo.propertyInfo).toEqual({
                     propertyName: 'prop',
-                    declaringType: TypeReflector.getTypeInfo(TestArgs),
+                    returnTypeInfo: TypeReflector.getTypeInfo(Scalar.STRING),
+                    declaringTypeInfo: TypeReflector.getTypeInfo(TestArgs),
                 });
             });
 
@@ -188,7 +188,7 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const argInfo = getArgInfo(TestType);
-                expect(argInfo.modifiers).toEqual({
+                expect(argInfo.modifierInfo).toEqual({
                     isList: true,
                     isRequired: false,
                     isRequiredList: false,
@@ -208,7 +208,7 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const argInfo = getArgInfo(TestType);
-                expect(argInfo.modifiers).toEqual({
+                expect(argInfo.modifierInfo).toEqual({
                     isList: true,
                     isRequired: false,
                     isRequiredList: true,
@@ -227,7 +227,7 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const argInfo = getArgInfo(TestType);
-                expect(argInfo.modifiers).toEqual({
+                expect(argInfo.modifierInfo).toEqual({
                     isList: true,
                     isRequired: false,
                     isRequiredList: false,
@@ -247,7 +247,7 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const argInfo = getArgInfo(TestType);
-                expect(argInfo.modifiers).toEqual({
+                expect(argInfo.modifierInfo).toEqual({
                     isList: false,
                     isRequired: true,
                     isRequiredList: false,
@@ -267,12 +267,39 @@ describe('Core: Type Reflector', () => {
                 }
 
                 const argInfo = getArgInfo(TestType);
-                expect(argInfo.modifiers).toEqual({
+                expect(argInfo.modifierInfo).toEqual({
                     isList: true,
                     isRequired: false,
                     isRequiredList: true,
                 });
             });
+        });
+    });
+
+    describe('getMetadataTypeInfos(typeInfo, metadataKey)', () => {
+        class TestMetadataType1 {}
+        class TestMetadataType2 {}
+
+        const TYPES = [TypeReflector.getTypeInfo(TestMetadataType1), TypeReflector.getTypeInfo(TestMetadataType2)];
+
+        test(`should return object type infos`, () => {
+            @ObjectType(TestMetadataType1, TestMetadataType2)
+            class TestType {}
+
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METADATA.OBJECT.TYPES);
+
+            expect(typeInfos).toEqual(TYPES);
+        });
+
+        test(`should return union type infos`, () => {
+            @UnionType(TestMetadataType1, TestMetadataType2)
+            class TestType {}
+
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METADATA.UNION.TYPES);
+
+            expect(typeInfos).toEqual(TYPES);
         });
     });
 });
