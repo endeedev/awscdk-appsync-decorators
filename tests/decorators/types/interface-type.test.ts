@@ -1,7 +1,7 @@
-import { faker } from '@faker-js/faker';
-
 import { METADATA, TYPE_ID } from '@/constants';
 import { InterfaceType } from '@/decorators';
+
+import { getTypeName } from '../../helpers';
 
 describe('Decorator: Interface Type', () => {
     describe('@InterfaceType()', () => {
@@ -20,7 +20,7 @@ describe('Decorator: Interface Type', () => {
     });
 
     describe('@InterfaceType(name)', () => {
-        const TYPE_NAME = faker.word.sample();
+        const TYPE_NAME = getTypeName();
 
         @InterfaceType(TYPE_NAME)
         class TestType {}

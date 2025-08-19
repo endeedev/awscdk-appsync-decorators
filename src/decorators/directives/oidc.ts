@@ -1,0 +1,7 @@
+import { DIRECTIVE_ID } from '@/constants';
+
+import { defineDirectiveMetadata } from '../helpers';
+
+export function Oidc(): ClassDecorator & PropertyDecorator {
+    return (...args: unknown[]) => defineDirectiveMetadata(DIRECTIVE_ID.OIDC, args);
+}

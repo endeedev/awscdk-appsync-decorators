@@ -1,7 +1,7 @@
-import { faker } from '@faker-js/faker';
-
 import { METADATA, TYPE_ID } from '@/constants';
 import { InputType } from '@/decorators';
+
+import { getTypeName } from '../../helpers';
 
 describe('Decorator: Input Type', () => {
     describe('@InputType()', () => {
@@ -20,7 +20,7 @@ describe('Decorator: Input Type', () => {
     });
 
     describe('@InputType(name)', () => {
-        const TYPE_NAME = faker.word.sample();
+        const TYPE_NAME = getTypeName();
 
         @InputType(TYPE_NAME)
         class TestType {}

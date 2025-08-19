@@ -12,7 +12,16 @@ export const TYPE_ID = {
     UNION: 'type:id:union',
 };
 
+export const DIRECTIVE_ID = {
+    APIKEY: 'directive:id:apikey',
+    COGNITO: 'directive:id:cognito',
+    IAM: 'directive:id:iam',
+    LAMBDA: 'directive:id:lambda',
+    OIDC: 'directive:id:oidc',
+};
+
 export const METADATA = {
+    // TYPES
     TYPE: {
         ID: 'metadata:type:id',
         NAME: 'metadata:type:name',
@@ -29,4 +38,12 @@ export const METADATA = {
     UNION: {
         TYPES: 'metadata:union:types',
     },
+    // DIRECTIVES
+    DIRECTIVE: {
+        ID: 'metadata:directive:id',
+    },
+    COGNITO: {
+        GROUPS: 'metadata:cognito:groups',
+    },
+    // RESOLVERS
 };

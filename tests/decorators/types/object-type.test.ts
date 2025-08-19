@@ -1,14 +1,14 @@
-import { faker } from '@faker-js/faker';
-
 import { METADATA, TYPE_ID } from '@/constants';
 import { ObjectType } from '@/decorators';
+
+import { getTypeName, getTypeNames } from '../../helpers';
 
 describe('Decorator: Object Type', () => {
     class TestType1 {}
     class TestType2 {}
 
-    const TYPE_NAME = faker.word.sample();
-    const TYPE_NAMES = [TestType1.name, TestType2.name].join(', ');
+    const TYPE_NAME = getTypeName();
+    const TYPE_NAMES = getTypeNames(TestType1, TestType2);
 
     describe('@ObjectType()', () => {
         @ObjectType()

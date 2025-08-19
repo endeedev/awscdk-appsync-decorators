@@ -1,7 +1,7 @@
-import { faker } from '@faker-js/faker';
-
 import { METADATA, TYPE_ID } from '@/constants';
 import { EnumType } from '@/decorators';
+
+import { getTypeName } from '../../helpers';
 
 describe('Decorator: Enum Type', () => {
     describe('@EnumType()', () => {
@@ -20,7 +20,7 @@ describe('Decorator: Enum Type', () => {
     });
 
     describe('@EnumType(name)', () => {
-        const TYPE_NAME = faker.word.sample();
+        const TYPE_NAME = getTypeName();
 
         @EnumType(TYPE_NAME)
         class TestType {}
