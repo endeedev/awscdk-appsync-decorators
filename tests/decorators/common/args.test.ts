@@ -11,8 +11,8 @@ describe('Decorator: Args', () => {
         }
 
         test(`should set '${METADATA.COMMON.ARGS}' to [${TestArgs.name}]`, () => {
-            const value = Reflect.getMetadata(METADATA.COMMON.ARGS, TestType.prototype, 'prop');
-            expect(value).toEqual(TestArgs);
+            const type = Reflect.getMetadata(METADATA.COMMON.ARGS, TestType.prototype, 'prop');
+            expect(type).toEqual(TestArgs);
         });
     });
 });
