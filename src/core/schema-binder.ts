@@ -30,7 +30,6 @@ import { DIRECTIVE_ID, LAMBDA_DIRECTIVE_STATEMENT, METADATA, RESOLVER_RUNTIME, T
 import { JsResolver, VtlResolver } from '@/resolvers';
 
 import { TypeReflector } from './type-reflector';
-import { TypeStore } from './type-store';
 
 type DirectiveFactory = (context: DirectiveInfo['context']) => Directive;
 type IntermediateTypeFactory = (typeInfo: TypeInfo) => IIntermediateType;
@@ -46,7 +45,7 @@ interface SchemaBindOptions {
 export class SchemaBinder {
     private _schema: CodeFirstSchema;
 
-    private _intermediateTypeStore: TypeStore<IIntermediateType>;
+    private _intermediateTypeStore: Record<string, IIntermediateType>;
 
     private _directiveFactories: Readonly<Record<string, DirectiveFactory>>;
     private _intermediateTypeFactories: Readonly<Record<string, IntermediateTypeFactory>>;
@@ -63,7 +62,7 @@ export class SchemaBinder {
         this._schema = new CodeFirstSchema();
 
         // Initialize the type store
-        this._intermediateTypeStore = new TypeStore<IIntermediateType>();
+        this._intermediateTypeStore = {};
 
         // Register the factories
         this._directiveFactories = {
@@ -225,7 +224,7 @@ export class SchemaBinder {
         const { typeId, typeName } = typeInfo;
 
         // Lookup the type in the store
-        let intermediateType = this._intermediateTypeStore.getType(typeName);
+        let intermediateType = this._intermediateTypeStore[typeName];
 
         // If not found, create a definition and add to the store
         if (!intermediateType) {
@@ -237,7 +236,7 @@ export class SchemaBinder {
 
             intermediateType = factory(typeInfo);
 
-            this._intermediateTypeStore.registerType(typeName, intermediateType);
+            this._intermediateTypeStore[typeName] = intermediateType;
 
             // Add the type to the schema definition
             this._schema.addType(intermediateType);
@@ -273,18 +272,11 @@ export class SchemaBinder {
 
         const instance = new resolverType();
 
-        // Match the data source for the resolver and create the field options
-        const { dataSource: dataSourceName, maxBatchSize } = instance;
-
-        const dataSource = dataSources[dataSourceName];
-
-        if (!dataSource) {
-            throw new Error(`Unable to find data source '${dataSourceName}'.`);
-        }
+        // Initialize the resolvable field options
+        const { maxBatchSize } = instance;
 
         let resolvableFieldOptions: ResolvableFieldOptions = {
             ...fieldOptions,
-            dataSource,
             maxBatchSize,
         };
 
@@ -342,6 +334,24 @@ export class SchemaBinder {
             resolvableFieldOptions = {
                 ...resolvableFieldOptions,
                 pipelineConfig,
+            };
+        } else {
+            // If a pipeline resolver is not configured, then include the data source
+            const { dataSource: dataSourceName } = instance;
+
+            if (!dataSourceName) {
+                throw new Error(`A data source is required for resolver '${resolverType.name}'.`);
+            }
+
+            const dataSource = dataSources[dataSourceName];
+
+            if (!dataSource) {
+                throw new Error(`Unable to find data source '${dataSourceName}'.`);
+            }
+
+            resolvableFieldOptions = {
+                ...resolvableFieldOptions,
+                dataSource,
             };
         }
 

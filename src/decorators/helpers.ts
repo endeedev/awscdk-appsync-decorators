@@ -2,7 +2,7 @@
 import { Type } from '@/common';
 import { METADATA } from '@/constants';
 
-const mergeTypeDirectives = (directiveId: string, target: Function) => {
+const concatTypeDirective = (directiveId: string, target: Function) => {
     const directiveIds = Reflect.hasMetadata(METADATA.DIRECTIVE.IDS, target)
         ? Reflect.getMetadata(METADATA.DIRECTIVE.IDS, target)
         : [];
@@ -10,7 +10,7 @@ const mergeTypeDirectives = (directiveId: string, target: Function) => {
     return [...directiveIds, directiveId];
 };
 
-const mergePropertyDirectives = (directiveId: string, target: Function, propertyKey: string | symbol) => {
+const concatPropertyDirective = (directiveId: string, target: Function, propertyKey: string | symbol) => {
     const directiveIds = Reflect.hasMetadata(METADATA.DIRECTIVE.IDS, target, propertyKey)
         ? Reflect.getMetadata(METADATA.DIRECTIVE.IDS, target, propertyKey)
         : [];
@@ -50,7 +50,7 @@ export const defineDirectiveMetadata = (
 
     // Define the directive id metadata - can be type or property
     if (propertyKey) {
-        const directiveIds = mergePropertyDirectives(directiveId, target as Function, propertyKey as string | symbol);
+        const directiveIds = concatPropertyDirective(directiveId, target as Function, propertyKey as string | symbol);
         Reflect.defineMetadata(
             METADATA.DIRECTIVE.IDS,
             directiveIds,
@@ -58,7 +58,7 @@ export const defineDirectiveMetadata = (
             propertyKey as string | symbol,
         );
     } else {
-        const directiveIds = mergeTypeDirectives(directiveId, target as Function);
+        const directiveIds = concatTypeDirective(directiveId, target as Function);
         Reflect.defineMetadata(METADATA.DIRECTIVE.IDS, directiveIds, target as Function);
     }
 
