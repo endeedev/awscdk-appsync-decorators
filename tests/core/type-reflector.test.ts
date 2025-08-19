@@ -363,7 +363,7 @@ describe('Core: Type Reflector', () => {
             const directiveInfo = directiveInfos.find(({ directiveId: id }) => id === directiveId);
 
             expect(directiveInfo).not.toBeUndefined();
-            expect(directiveInfo?.context).toEqual(context);
+            expect(directiveInfo!.context).toEqual(context);
         };
 
         @ApiKey()

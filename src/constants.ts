@@ -1,5 +1,7 @@
 import 'reflect-metadata';
 
+export const LAMBDA_DIRECTIVE_STATEMENT = '@aws_lambda';
+
 export const TYPE_ID = {
     QUERY: 'type:id:query',
     MUTATION: 'type:id:mutation',
