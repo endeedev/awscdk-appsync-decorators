@@ -21,11 +21,13 @@ export const DIRECTIVE_ID = {
     LAMBDA: 'directive:id:lambda',
     OIDC: 'directive:id:oidc',
     CUSTOM: 'directive:id:custom',
+    SUBSCRIBE: 'directive:id:subscribe',
 };
 
 export const TYPE_NAME = {
     QUERY: 'Query',
     MUTATION: 'Mutation',
+    SUBSCRIPTION: 'Subscription',
 };
 
 export const RESOLVER_RUNTIME = {
@@ -52,5 +54,6 @@ export const METADATA = {
         IDS: 'metadata:directive:ids',
         COGNITO_GROUPS: 'metadata:directive:cognito:groups',
         CUSTOM_STATEMENT: 'metadata:directive:custom:statement',
+        SUBSCRIBE_MUTATIONS: 'metadata:directive:subscribe:mutations',
     },
 };

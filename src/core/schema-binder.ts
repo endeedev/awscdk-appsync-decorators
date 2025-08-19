@@ -47,11 +47,12 @@ export class SchemaBinder {
 
     private _intermediateTypeStore: TypeStore<IIntermediateType>;
 
-    private _directiveFactories: Record<string, DirectiveFactory>;
-    private _intermediateTypeFactories: Record<string, IntermediateTypeFactory>;
+    private _directiveFactories: Readonly<Record<string, DirectiveFactory>>;
+    private _intermediateTypeFactories: Readonly<Record<string, IntermediateTypeFactory>>;
 
     private _query?: Type<object>;
     private _mutation?: Type<object>;
+    private _subscription?: Type<object>;
 
     get schema(): ISchema {
         return this._schema;
@@ -71,6 +72,7 @@ export class SchemaBinder {
             [DIRECTIVE_ID.IAM]: this.createIamDirective.bind(this),
             [DIRECTIVE_ID.LAMBDA]: this.createLambdaDirective.bind(this),
             [DIRECTIVE_ID.OIDC]: this.createOidcDirective.bind(this),
+            [DIRECTIVE_ID.SUBSCRIBE]: this.createSubscribeDirective.bind(this),
         };
 
         this._intermediateTypeFactories = {
@@ -88,6 +90,10 @@ export class SchemaBinder {
 
     addMutation(mutation: Type<object>): void {
         this._mutation = mutation;
+    }
+
+    addSubscription(subscription: Type<object>): void {
+        this._subscription = subscription;
     }
 
     bindSchema(options?: SchemaBindOptions): void {
@@ -122,9 +128,25 @@ export class SchemaBinder {
                 this._schema.addMutation(name, field);
             }
         }
+
+        // Add the subscription type
+        if (this._subscription) {
+            const fields = this.createFields(
+                {
+                    typeId: TYPE_ID.SUBSCRIPTION,
+                    typeName: TYPE_NAME.SUBSCRIPTION,
+                    definitionType: this._subscription as Type<object>,
+                },
+                options,
+            );
+
+            for (const [name, field] of Object.entries(fields)) {
+                this._schema.addSubscription(name, field);
+            }
+        }
     }
 
-    private createFields(typeInfo: TypeInfo, options?: SchemaBindOptions): Record<string, Field> {
+    private createFields(typeInfo: TypeInfo, options?: SchemaBindOptions): Readonly<Record<string, Field>> {
         const fieldInfos = TypeReflector.getFieldInfos(typeInfo);
 
         const dataSources = options?.dataSources ?? {};
@@ -216,7 +238,7 @@ export class SchemaBinder {
         return intermediateType;
     }
 
-    private createArgs(argInfos: ArgInfo[]): Record<string, GraphqlType> | undefined {
+    private createArgs(argInfos: ArgInfo[]): Readonly<Record<string, GraphqlType>> | undefined {
         // If no arguments then return an undefined value
         if (argInfos.length === 0) {
             return undefined;
@@ -327,6 +349,11 @@ export class SchemaBinder {
 
     private createOidcDirective(): Directive {
         return Directive.oidc();
+    }
+
+    private createSubscribeDirective(context: DirectiveInfo['context']): Directive {
+        const mutations = context!.mutations as string[];
+        return Directive.subscribe(...mutations);
     }
 
     // #endregion

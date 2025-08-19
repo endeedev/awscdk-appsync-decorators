@@ -327,7 +327,7 @@ describe('Core: Type Reflector', () => {
         const assertDirective = (
             directiveId: string,
             directiveInfos: DirectiveInfo[],
-            context?: Record<string, unknown>,
+            context?: Readonly<Record<string, unknown>>,
         ) => {
             const directiveInfo = directiveInfos.find(({ directiveId: id }) => id === directiveId);
 

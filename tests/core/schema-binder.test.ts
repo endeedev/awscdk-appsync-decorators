@@ -39,6 +39,7 @@ import {
     Oidc,
     Required,
     Resolver,
+    Subscribe,
     UnionType,
 } from '@/decorators';
 import { JsResolver, VtlResolver } from '@/resolvers';
@@ -143,6 +144,17 @@ describe('Core: Schema Binder', () => {
             assertDirective(Query, Directive.oidc());
         });
 
+        test('should create subscribe directive', () => {
+            const MUTATION = getName();
+
+            class Query {
+                @Subscribe(MUTATION)
+                prop = Scalar.ID;
+            }
+
+            assertDirective(Query, Directive.subscribe(MUTATION));
+        });
+
         test('should throw if directive factory is not found', () => {
             const directiveId = getName();
 
@@ -167,17 +179,20 @@ describe('Core: Schema Binder', () => {
         const assertIntermediateType = (
             query: Type<object>,
             mutation: Type<object>,
+            subscription: Type<object>,
             intermediateType: IIntermediateType,
         ) => {
-            const { binder, addQuerySpy, addMutationSpy, addTypeSpy } = createContext((binder) => {
+            const { binder, addQuerySpy, addMutationSpy, addSubscriptionSpy, addTypeSpy } = createContext((binder) => {
                 binder.addQuery(query);
                 binder.addMutation(mutation);
+                binder.addSubscription(subscription);
             });
 
             binder.bindSchema();
 
             expect(addQuerySpy).toHaveBeenCalledTimes(1);
             expect(addMutationSpy).toHaveBeenCalledTimes(1);
+            expect(addSubscriptionSpy).toHaveBeenCalledTimes(1);
 
             expect(addTypeSpy).toHaveBeenCalledWith(intermediateType);
         };
@@ -196,9 +211,14 @@ describe('Core: Schema Binder', () => {
                 prop = TestType;
             }
 
+            class Subscription {
+                prop = TestType;
+            }
+
             assertIntermediateType(
                 Query,
                 Mutation,
+                Subscription,
                 new SchemaEnumType(TestType.name, {
                     definition: ['VALUE'],
                 }),
@@ -221,9 +241,14 @@ describe('Core: Schema Binder', () => {
                 prop = TestType;
             }
 
+            class Subscription {
+                prop = TestType;
+            }
+
             assertIntermediateType(
                 Query,
                 Mutation,
+                Subscription,
                 new SchemaInputType(TestType.name, {
                     definition: {
                         prop: new ResolvableField({
@@ -255,9 +280,14 @@ describe('Core: Schema Binder', () => {
                 prop = TestType;
             }
 
+            class Subscription {
+                prop = TestType;
+            }
+
             assertIntermediateType(
                 Query,
                 Mutation,
+                Subscription,
                 new SchemaInterfaceType(TestType.name, {
                     definition: {
                         prop: new ResolvableField({
@@ -301,9 +331,15 @@ describe('Core: Schema Binder', () => {
                 prop = TestType2;
             }
 
+            class Subscription {
+                @Args(TestArgs)
+                prop = TestType2;
+            }
+
             assertIntermediateType(
                 Query,
                 Mutation,
+                Subscription,
                 new SchemaObjectType(TestType2.name, {
                     definition: {
                         prop: new ResolvableField({
@@ -354,9 +390,14 @@ describe('Core: Schema Binder', () => {
                 prop = TestType2;
             }
 
+            class Subscription {
+                prop = TestType2;
+            }
+
             assertIntermediateType(
                 Query,
                 Mutation,
+                Subscription,
                 new SchemaUnionType(TestType2.name, {
                     definition: [
                         new SchemaObjectType(TestType1.name, {
@@ -415,15 +456,23 @@ describe('Core: Schema Binder', () => {
                 prop4 = TestType;
             }
 
+            class Subscription {
+                prop1 = TestType;
+                prop2 = TestType;
+                prop3 = TestType;
+                prop4 = TestType;
+            }
+
             const { binder, addTypeSpy } = createContext((binder) => {
                 binder.addQuery(Query);
                 binder.addMutation(Mutation);
+                binder.addSubscription(Subscription);
             });
 
             binder.bindSchema();
 
-            // Query, Mutation and TestInterface
-            expect(addTypeSpy).toHaveBeenCalledTimes(3);
+            // Query, Mutation Subscription, and TestInterface
+            expect(addTypeSpy).toHaveBeenCalledTimes(4);
         });
     });
 

@@ -14,7 +14,7 @@ import { ResolverBase } from '@/resolvers';
 
 const SCALARS = Object.values(Scalar);
 
-type DirectiveFactory = (typeInfo: TypeInfo, propertyInfo?: PropertyInfo) => Record<string, unknown>;
+type DirectiveFactory = (typeInfo: TypeInfo, propertyInfo?: PropertyInfo) => Readonly<Record<string, unknown>>;
 
 interface ReflectedProperty {
     readonly propertyInfo: PropertyInfo;
@@ -22,11 +22,13 @@ interface ReflectedProperty {
 }
 
 export class TypeReflector {
-    private static _directiveFactories: Record<string, DirectiveFactory> = {
+    private static _directiveFactories: Readonly<Record<string, DirectiveFactory>> = {
         [DIRECTIVE_ID.COGNITO]: (typeInfo, propertyInfo) =>
             this.getDirectiveContext('groups', METADATA.DIRECTIVE.COGNITO_GROUPS, typeInfo, propertyInfo),
         [DIRECTIVE_ID.CUSTOM]: (typeInfo, propertyInfo) =>
             this.getDirectiveContext('statement', METADATA.DIRECTIVE.CUSTOM_STATEMENT, typeInfo, propertyInfo),
+        [DIRECTIVE_ID.SUBSCRIBE]: (typeInfo, propertyInfo) =>
+            this.getDirectiveContext('mutations', METADATA.DIRECTIVE.SUBSCRIBE_MUTATIONS, typeInfo, propertyInfo),
     };
 
     static getTypeInfo(type: Scalar | Type<object>): TypeInfo {
@@ -124,7 +126,7 @@ export class TypeReflector {
         metadataKey: string,
         typeInfo: TypeInfo,
         propertyInfo?: PropertyInfo,
-    ): Record<string, unknown> {
+    ): Readonly<Record<string, unknown>> {
         return {
             [contextKey]: propertyInfo
                 ? this.getMetadata(metadataKey, typeInfo, propertyInfo)
