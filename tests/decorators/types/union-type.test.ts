@@ -7,7 +7,6 @@ describe('Decorator: Union Type', () => {
     class TestType1 {}
     class TestType2 {}
 
-    const TYPE_NAME = getName();
     const TYPE_NAMES = getTypeNames(TestType1, TestType2);
 
     describe('@UnionType(type, types)', () => {
@@ -31,6 +30,8 @@ describe('Decorator: Union Type', () => {
     });
 
     describe('@UnionType(name, type, types)', () => {
+        const TYPE_NAME = getName();
+
         @UnionType(TYPE_NAME, TestType1, TestType2)
         class TestType {}
 

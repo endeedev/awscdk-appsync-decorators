@@ -1,3 +1,3 @@
-export * from './function-base';
-export * from './js-function';
-export * from './vtl-function';
+export * from './js-operation';
+export * from './operation-base';
+export * from './vtl-operation';

@@ -21,9 +21,9 @@ export const DIRECTIVE_ID = {
     CUSTOM: 'directive:id:custom',
 };
 
-export const FUNCTION_TYPE = {
-    JS: 'function:type:js',
-    VTL: 'function:type:vtl',
+export const RESOLVER_RUNTIME = {
+    JS: 'resolver:runtime:js',
+    VTL: 'resolver:runtime:vtl',
 };
 
 export const METADATA = {
@@ -32,7 +32,7 @@ export const METADATA = {
         LIST: 'metadata:list',
         REQUIRED: 'metadata:required',
         REQUIRED_LIST: 'metadata:required:list',
-        RESOLVER_FUNCTIONS: 'metadata:resolver:functions',
+        RESOLVER_OPERATIONS: 'metadata:resolver:operations',
     },
     TYPE: {
         ID: 'metadata:type:id',

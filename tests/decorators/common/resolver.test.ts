@@ -1,37 +1,36 @@
-import { Code, FunctionRuntime, MappingTemplate } from 'aws-cdk-lib/aws-appsync';
+import { Code, MappingTemplate } from 'aws-cdk-lib/aws-appsync';
 
 import { METADATA } from '@/constants';
 import { Resolver } from '@/decorators';
-import { JsFunction, VtlFunction } from '@/resolvers';
+import { JsOperation, VtlOperation } from '@/resolvers';
 
 import { getName, getTypeNames } from '../../helpers';
 
 describe('Decorator: Resolver', () => {
-    describe('@Resolver(func, funcs)', () => {
+    describe('@Resolver(operation, operations)', () => {
         const DATA_SOURCE = getName();
 
-        class TestJsFunction extends JsFunction {
+        class TestJsOperation extends JsOperation {
             dataSourceName = DATA_SOURCE;
-            runtime = FunctionRuntime.JS_1_0_0;
             code = Code.fromInline(`// CODE`);
         }
 
-        class TestVtlFunction extends VtlFunction {
+        class TestVtlOperation extends VtlOperation {
             dataSourceName = DATA_SOURCE;
             requestMappingTemplate = MappingTemplate.fromString('# REQUEST');
             responseMappingTemplate = MappingTemplate.fromString('# RESPONSE');
         }
 
         class TestType {
-            @Resolver(TestJsFunction, TestVtlFunction)
+            @Resolver(TestJsOperation, TestVtlOperation)
             prop = 0;
         }
 
-        const TYPE_NAMES = getTypeNames(TestJsFunction, TestVtlFunction);
+        const TYPE_NAMES = getTypeNames(TestJsOperation, TestVtlOperation);
 
-        test(`should set '${METADATA.COMMON.RESOLVER_FUNCTIONS}' to [${TYPE_NAMES}]`, () => {
-            const functions = Reflect.getMetadata(METADATA.COMMON.RESOLVER_FUNCTIONS, TestType.prototype, 'prop');
-            expect(functions).toEqual([TestJsFunction, TestVtlFunction]);
+        test(`should set '${METADATA.COMMON.RESOLVER_OPERATIONS}' to [${TYPE_NAMES}]`, () => {
+            const operations = Reflect.getMetadata(METADATA.COMMON.RESOLVER_OPERATIONS, TestType.prototype, 'prop');
+            expect(operations).toEqual([TestJsOperation, TestVtlOperation]);
         });
     });
 });

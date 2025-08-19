@@ -1,14 +1,14 @@
 import { MappingTemplate } from 'aws-cdk-lib/aws-appsync';
 
-import { FUNCTION_TYPE } from '@/constants';
+import { RESOLVER_RUNTIME } from '@/constants';
 
-import { FunctionBase } from './function-base';
+import { OperationBase } from './operation-base';
 
-export abstract class VtlFunction extends FunctionBase {
+export abstract class VtlOperation extends OperationBase {
     abstract readonly requestMappingTemplate: MappingTemplate;
     abstract readonly responseMappingTemplate: MappingTemplate;
 
     constructor() {
-        super(FUNCTION_TYPE.VTL);
+        super(RESOLVER_RUNTIME.VTL);
     }
 }
