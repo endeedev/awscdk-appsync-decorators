@@ -81,6 +81,16 @@ describe('Core: Schema Binder', () => {
         };
     };
 
+    describe('bindSchema()', () => {
+        test('should not throw if not setup', () => {
+            const { binder } = createContext(() => {
+                // Don't setup any queries, mutations, or subscriptions
+            });
+
+            expect(() => binder.bindSchema()).not.toThrow();
+        });
+    });
+
     describe('Directives', () => {
         const assertDirective = (query: Type<object>, directive: Directive) => {
             const { binder, addQuerySpy } = createContext((binder) => {
