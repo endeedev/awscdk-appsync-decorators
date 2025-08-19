@@ -1,4 +1,4 @@
-import { BaseDataSource, ISchema } from 'aws-cdk-lib/aws-appsync';
+import { ISchema } from 'aws-cdk-lib/aws-appsync';
 import {
     CodeFirstSchema,
     Directive,
@@ -19,12 +19,11 @@ import { TypeReflector } from './type-reflector';
 import { TypeStore } from './type-store';
 
 type DirectiveFactory = (context: DirectiveInfo['context']) => Directive;
-type IntermediateTypeFactory = (typeInfo: TypeInfo, schema: CodeFirstSchema) => IIntermediateType;
+type IntermediateTypeFactory = (typeInfo: TypeInfo) => IIntermediateType;
 
 export class SchemaBinder {
     private _schema: CodeFirstSchema;
 
-    private _dataSourceStore: TypeStore<BaseDataSource>;
     private _intermediateTypeStore: TypeStore<IIntermediateType>;
 
     private _directiveFactories: Record<string, DirectiveFactory>;
@@ -40,8 +39,7 @@ export class SchemaBinder {
     constructor() {
         this._schema = new CodeFirstSchema();
 
-        // Initialize the stores
-        this._dataSourceStore = new TypeStore<BaseDataSource>();
+        // Initialize the type store
         this._intermediateTypeStore = new TypeStore<IIntermediateType>();
 
         // Register the factories
@@ -71,21 +69,14 @@ export class SchemaBinder {
         this._mutation = mutation;
     }
 
-    addDataSource(dataSource: BaseDataSource): void {
-        this._dataSourceStore.registerType(dataSource.name, dataSource);
-    }
-
     bindSchema(): void {
         // Add the query type
         if (this._query) {
-            const fields = this.createFields(
-                {
-                    typeId: TYPE_ID.QUERY,
-                    typeName: 'Query',
-                    definitionType: this._query as Type<object>,
-                },
-                this._schema,
-            );
+            const fields = this.createFields({
+                typeId: TYPE_ID.QUERY,
+                typeName: 'Query',
+                definitionType: this._query as Type<object>,
+            });
 
             for (const [name, field] of Object.entries(fields)) {
                 this._schema.addQuery(name, field);
@@ -94,14 +85,11 @@ export class SchemaBinder {
 
         // Add the mutation type
         if (this._mutation) {
-            const fields = this.createFields(
-                {
-                    typeId: TYPE_ID.MUTATION,
-                    typeName: 'Mutation',
-                    definitionType: this._mutation as Type<object>,
-                },
-                this._schema,
-            );
+            const fields = this.createFields({
+                typeId: TYPE_ID.MUTATION,
+                typeName: 'Mutation',
+                definitionType: this._mutation as Type<object>,
+            });
 
             for (const [name, field] of Object.entries(fields)) {
                 this._schema.addMutation(name, field);
@@ -109,37 +97,7 @@ export class SchemaBinder {
         }
     }
 
-    private createType(typeInfo: TypeInfo, modifierInfo: ModifierInfo, schema: CodeFirstSchema): GraphqlType {
-        const { typeId, definitionType } = typeInfo;
-
-        // Build scalar types separately
-        if (typeId === TYPE_ID.SCALAR) {
-            return new GraphqlType(`${definitionType}` as TypeBase, {
-                ...modifierInfo,
-            });
-        }
-
-        // Build any other intermediate types
-        return new GraphqlType(TypeBase.INTERMEDIATE, {
-            intermediateType: this.createIntermediateType(typeInfo, schema),
-            ...modifierInfo,
-        });
-    }
-
-    private createDirectives(typeInfo: TypeInfo, propertyInfo?: PropertyInfo): Directive[] {
-        const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo, propertyInfo);
-
-        // Map each directive info the relevant directive type
-        return directiveInfos.map((directiveInfo) => {
-            const { directiveId } = directiveInfo;
-
-            const factory = this._directiveFactories[directiveId];
-
-            return factory(directiveInfo.context);
-        });
-    }
-
-    private createFields(typeInfo: TypeInfo, schema: CodeFirstSchema): Record<string, ResolvableField> {
+    private createFields(typeInfo: TypeInfo): Record<string, ResolvableField> {
         const fieldInfos = TypeReflector.getFieldInfos(typeInfo);
 
         // Create resolvable fields for the type field infos
@@ -147,8 +105,8 @@ export class SchemaBinder {
             const { propertyName, returnTypeInfo } = propertyInfo;
 
             const directives = this.createDirectives(typeInfo, propertyInfo);
-            const returnType = this.createType(returnTypeInfo, modifierInfo, schema);
-            const args = this.createArgs(argInfos, schema);
+            const returnType = this.createType(returnTypeInfo, modifierInfo);
+            const args = this.createArgs(argInfos);
 
             return {
                 ...output,
@@ -161,7 +119,66 @@ export class SchemaBinder {
         }, {});
     }
 
-    private createArgs(argInfos: ArgInfo[], schema: CodeFirstSchema): Record<string, GraphqlType> | undefined {
+    private createDirectives(typeInfo: TypeInfo, propertyInfo?: PropertyInfo): Directive[] {
+        const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo, propertyInfo);
+
+        // Map each directive info the relevant directive type
+        return directiveInfos.map((directiveInfo) => {
+            const { directiveId } = directiveInfo;
+
+            const factory = this._directiveFactories[directiveId];
+
+            if (!factory) {
+                throw new Error(`Unable to create directive of type '${directiveId}'.`);
+            }
+
+            return factory(directiveInfo.context);
+        });
+    }
+
+    private createType(typeInfo: TypeInfo, modifierInfo: ModifierInfo): GraphqlType {
+        const { typeId, definitionType } = typeInfo;
+
+        // Build scalar types separately
+        if (typeId === TYPE_ID.SCALAR) {
+            return new GraphqlType(`${definitionType}` as TypeBase, {
+                ...modifierInfo,
+            });
+        }
+
+        // Build any other intermediate types
+        return new GraphqlType(TypeBase.INTERMEDIATE, {
+            intermediateType: this.createIntermediateType(typeInfo),
+            ...modifierInfo,
+        });
+    }
+
+    private createIntermediateType(typeInfo: TypeInfo): IIntermediateType {
+        const { typeId, typeName } = typeInfo;
+
+        // Lookup the type in the store
+        let intermediateType = this._intermediateTypeStore.getType(typeName);
+
+        // If not found, create a definition and add to the store
+        if (!intermediateType) {
+            const factory = this._intermediateTypeFactories[typeId];
+
+            if (!factory) {
+                throw new Error(`Unable to create intermediate type '${typeId}'.`);
+            }
+
+            intermediateType = factory(typeInfo);
+
+            this._intermediateTypeStore.registerType(typeName, intermediateType);
+
+            // Add the type to the schema definition
+            this._schema.addType(intermediateType);
+        }
+
+        return intermediateType;
+    }
+
+    private createArgs(argInfos: ArgInfo[]): Record<string, GraphqlType> | undefined {
         // If no arguments then return an undefined value
         if (argInfos.length === 0) {
             return undefined;
@@ -170,18 +187,20 @@ export class SchemaBinder {
         return argInfos.reduce(
             (output, { propertyInfo: { propertyName, returnTypeInfo }, modifierInfo }) => ({
                 ...output,
-                [propertyName]: this.createType(returnTypeInfo, modifierInfo, schema),
+                [propertyName]: this.createType(returnTypeInfo, modifierInfo),
             }),
             {},
         );
     }
+
+    // #region Directive Factories
 
     private createApiKeyDirective(): Directive {
         return Directive.apiKey();
     }
 
     private createCognitoDirective(context: DirectiveInfo['context']): Directive {
-        return Directive.cognito(...context!.groups as string[]);
+        return Directive.cognito(...(context!.groups as string[]));
     }
 
     private createCustomDirective(context: DirectiveInfo['context']): Directive {
@@ -200,6 +219,10 @@ export class SchemaBinder {
         return Directive.oidc();
     }
 
+    // #endregion
+
+    // #region Type Factories
+
     private createEnumType(typeInfo: TypeInfo): EnumType {
         const { typeName } = typeInfo;
 
@@ -213,11 +236,11 @@ export class SchemaBinder {
         });
     }
 
-    private createInputType(typeInfo: TypeInfo, schema: CodeFirstSchema): InputType {
+    private createInputType(typeInfo: TypeInfo): InputType {
         const { typeName } = typeInfo;
 
         // An input type requires a definition of fields and directives
-        const definition = this.createFields(typeInfo, schema);
+        const definition = this.createFields(typeInfo);
         const directives = this.createDirectives(typeInfo);
 
         return new InputType(typeName, {
@@ -226,11 +249,11 @@ export class SchemaBinder {
         });
     }
 
-    private createInterfaceType(typeInfo: TypeInfo, schema: CodeFirstSchema): InterfaceType {
+    private createInterfaceType(typeInfo: TypeInfo): InterfaceType {
         const { typeName } = typeInfo;
 
         // An interface type requires a definition of fields and directives
-        const definition = this.createFields(typeInfo, schema);
+        const definition = this.createFields(typeInfo);
         const directives = this.createDirectives(typeInfo);
 
         return new InterfaceType(typeName, {
@@ -239,11 +262,11 @@ export class SchemaBinder {
         });
     }
 
-    private createObjectType(typeInfo: TypeInfo, schema: CodeFirstSchema): ObjectType {
+    private createObjectType(typeInfo: TypeInfo): ObjectType {
         const { typeName } = typeInfo;
 
         // An object type requires a definition of fields and directives
-        const definition = this.createFields(typeInfo, schema);
+        const definition = this.createFields(typeInfo);
         const directives = this.createDirectives(typeInfo);
 
         // An object type can also implement interfaces
@@ -254,13 +277,11 @@ export class SchemaBinder {
             definition,
             directives,
             interfaceTypes:
-                typeInfos.length === 0
-                    ? undefined
-                    : typeInfos.map((typeInfo) => this.createIntermediateType(typeInfo, schema)),
+                typeInfos.length === 0 ? undefined : typeInfos.map((typeInfo) => this.createIntermediateType(typeInfo)),
         });
     }
 
-    private createUnionType(typeInfo: TypeInfo, schema: CodeFirstSchema): UnionType {
+    private createUnionType(typeInfo: TypeInfo): UnionType {
         const { typeName } = typeInfo;
 
         // A union type decorator will define the types to use
@@ -268,28 +289,9 @@ export class SchemaBinder {
         const typeInfos = TypeReflector.getMetadataTypeInfos(METADATA.TYPE.UNION_TYPES, typeInfo);
 
         return new UnionType(typeName, {
-            definition: typeInfos.map((typeInfo) => this.createIntermediateType(typeInfo, schema)),
+            definition: typeInfos.map((typeInfo) => this.createIntermediateType(typeInfo)),
         });
     }
 
-    private createIntermediateType(typeInfo: TypeInfo, schema: CodeFirstSchema): IIntermediateType {
-        const { typeId, typeName } = typeInfo;
-
-        // Lookup the type in the store
-        let intermediateType = this._intermediateTypeStore.getType(typeName);
-
-        // If not found, create a definition and add to the store
-        if (!intermediateType) {
-            const factory = this._intermediateTypeFactories[typeId];
-
-            intermediateType = factory(typeInfo, schema);
-
-            this._intermediateTypeStore.registerType(typeName, intermediateType);
-
-            // Add the type to the schema definition
-            schema.addType(intermediateType);
-        }
-
-        return intermediateType;
-    }
+    // #endregion
 }
