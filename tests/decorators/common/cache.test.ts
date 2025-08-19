@@ -7,7 +7,7 @@ describe('Decorators: Cache', () => {
     describe('@Cache(ttl, keys)', () => {
         const TTL = getNumber();
         const KEYS = getNames();
-        const KEY_NAMES = KEYS.join('');
+        const KEY_NAMES = KEYS.join(', ');
 
         class TestType {
             @Cache(TTL, ...KEYS)

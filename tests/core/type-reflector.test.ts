@@ -1,6 +1,4 @@
-import { Code } from 'aws-cdk-lib/aws-appsync';
-
-import { DirectiveInfo, Scalar, Type } from '@/common';
+import { DirectiveInfo, Scalar, Type, TypeInfo } from '@/common';
 import { DIRECTIVE_ID, METADATA, TYPE_ID } from '@/constants';
 import { TypeReflector } from '@/core';
 import {
@@ -17,13 +15,20 @@ import {
     Required,
     RequiredList,
     Resolver,
+    Subscribe,
     UnionType,
 } from '@/decorators';
-import { JsResolver } from '@/resolvers';
+import { ResolverBase } from '@/resolvers';
 
 import { getName, getNames, getNumber, getScalar, getTypeInfos } from '../helpers';
 
 describe('Core: Type Reflector', () => {
+    const getPropertyInfo = (typeInfo: TypeInfo, scalar: Scalar) => ({
+        propertyName: 'prop',
+        returnTypeInfo: TypeReflector.getTypeInfo(scalar),
+        declaringTypeInfo: typeInfo,
+    });
+
     describe('getTypeInfo(scalar)', () => {
         const SCALAR = getScalar();
 
@@ -65,6 +70,7 @@ describe('Core: Type Reflector', () => {
             const fieldInfos = TypeReflector.getFieldInfos(typeInfo);
 
             const [first] = fieldInfos;
+
             expect(fieldInfos).toHaveLength(1);
 
             return {
@@ -162,6 +168,7 @@ describe('Core: Type Reflector', () => {
                 const { fieldInfo } = getFieldInfo(type);
 
                 const [first] = fieldInfo.argInfos;
+
                 expect(fieldInfo.argInfos).toHaveLength(1);
 
                 return first;
@@ -323,6 +330,8 @@ describe('Core: Type Reflector', () => {
         const GROUP = getName();
         const GROUPS = getNames();
         const STATEMENT = getName();
+        const MUTATION = getName();
+        const MUTATIONS = getNames();
         const SCALAR = getScalar();
 
         const assertDirective = (
@@ -349,6 +358,7 @@ describe('Core: Type Reflector', () => {
             @Iam()
             @Lambda()
             @Oidc()
+            @Subscribe(MUTATION, ...MUTATIONS)
             prop = SCALAR;
         }
 
@@ -374,13 +384,10 @@ describe('Core: Type Reflector', () => {
 
         test('should return directive infos for property', () => {
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo, {
-                propertyName: 'prop',
-                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
-                declaringTypeInfo: typeInfo,
-            });
+            const propertyInfo = getPropertyInfo(typeInfo, SCALAR);
+            const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo, propertyInfo);
 
-            expect(directiveInfos).toHaveLength(6);
+            expect(directiveInfos).toHaveLength(7);
 
             assertDirective(DIRECTIVE_ID.API_KEY, directiveInfos);
             assertDirective(DIRECTIVE_ID.IAM, directiveInfos);
@@ -393,6 +400,10 @@ describe('Core: Type Reflector', () => {
 
             assertDirective(DIRECTIVE_ID.CUSTOM, directiveInfos, {
                 statement: STATEMENT,
+            });
+
+            assertDirective(DIRECTIVE_ID.SUBSCRIBE, directiveInfos, {
+                mutations: [MUTATION, ...MUTATIONS],
             });
         });
 
@@ -409,27 +420,23 @@ describe('Core: Type Reflector', () => {
             class TestType {}
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo, {
-                propertyName: 'prop',
-                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
-                declaringTypeInfo: typeInfo,
-            });
+            const propertyInfo = getPropertyInfo(typeInfo, SCALAR);
+            const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo, propertyInfo);
 
             expect(directiveInfos).toHaveLength(0);
         });
     });
 
     describe('getMetadataResolverInfo(typeInfo, propertyInfo)', () => {
-        const DATA_SOURCE = getName();
-        const MAX_BATCH_SIZE = getNumber();
+        const RUNTIME = getName();
         const SCALAR = getScalar();
         const FUNCTION1 = getName();
         const FUNCTION2 = getName();
 
-        class TestResolver extends JsResolver {
-            dataSource = DATA_SOURCE;
-            maxBatchSize = MAX_BATCH_SIZE;
-            code = Code.fromInline('// CODE');
+        class TestResolver extends ResolverBase {
+            constructor() {
+                super(RUNTIME);
+            }
         }
 
         test('should return resolver info', () => {
@@ -439,11 +446,8 @@ describe('Core: Type Reflector', () => {
             }
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const resolverInfo = TypeReflector.getMetadataResolverInfo(typeInfo, {
-                propertyName: 'prop',
-                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
-                declaringTypeInfo: typeInfo,
-            });
+            const propertyInfo = getPropertyInfo(typeInfo, SCALAR);
+            const resolverInfo = TypeReflector.getMetadataResolverInfo(typeInfo, propertyInfo);
 
             expect(resolverInfo).toEqual({
                 resolverType: TestResolver,
@@ -457,11 +461,8 @@ describe('Core: Type Reflector', () => {
             }
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const resolverInfo = TypeReflector.getMetadataResolverInfo(typeInfo, {
-                propertyName: 'prop',
-                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
-                declaringTypeInfo: typeInfo,
-            });
+            const propertyInfo = getPropertyInfo(typeInfo, SCALAR);
+            const resolverInfo = TypeReflector.getMetadataResolverInfo(typeInfo, propertyInfo);
 
             expect(resolverInfo).toBeUndefined();
         });
@@ -479,11 +480,8 @@ describe('Core: Type Reflector', () => {
             }
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const cacheInfo = TypeReflector.getMetadataCacheInfo(typeInfo, {
-                propertyName: 'prop',
-                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
-                declaringTypeInfo: typeInfo,
-            });
+            const propertyInfo = getPropertyInfo(typeInfo, SCALAR);
+            const cacheInfo = TypeReflector.getMetadataCacheInfo(typeInfo, propertyInfo);
 
             expect(cacheInfo).toEqual({
                 ttl: TTL,
@@ -491,17 +489,14 @@ describe('Core: Type Reflector', () => {
             });
         });
 
-        test('should return undefined if no cache', () => {
+        test('should return undefined if no caching', () => {
             class TestType {
                 prop = SCALAR;
             }
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const cacheInfo = TypeReflector.getMetadataCacheInfo(typeInfo, {
-                propertyName: 'prop',
-                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
-                declaringTypeInfo: typeInfo,
-            });
+            const propertyInfo = getPropertyInfo(typeInfo, SCALAR);
+            const cacheInfo = TypeReflector.getMetadataCacheInfo(typeInfo, propertyInfo);
 
             expect(cacheInfo).toBeUndefined();
         });

@@ -6,8 +6,6 @@ import { VtlResolver } from '@/resolvers';
 describe('Resolvers: VTL Resolver', () => {
     describe('constructor()', () => {
         class TestResolver extends VtlResolver {
-            dataSource = '';
-            maxBatchSize = 0;
             requestMappingTemplate = MappingTemplate.fromString('# REQUEST');
             responseMappingTemplate = MappingTemplate.fromString('# RESPONSE');
         }

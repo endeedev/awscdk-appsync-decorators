@@ -1,22 +1,19 @@
-import { Code, MappingTemplate } from 'aws-cdk-lib/aws-appsync';
-
 import { METADATA } from '@/constants';
 import { Resolver } from '@/decorators';
-import { JsResolver, VtlResolver } from '@/resolvers';
+import { ResolverBase } from '@/resolvers';
 
-import { getName, getNumber } from '../../helpers';
+import { getName } from '../../helpers';
 
 describe('Decorators: Resolver', () => {
-    const DATA_SOURCE = getName();
-    const MAX_BATCH_SIZE = getNumber();
+    const RUNTIME = getName();
+
+    class TestResolver extends ResolverBase {
+        constructor() {
+            super(RUNTIME);
+        }
+    }
 
     describe('@Resolver(type)', () => {
-        class TestResolver extends JsResolver {
-            dataSource = DATA_SOURCE;
-            maxBatchSize = MAX_BATCH_SIZE;
-            code = Code.fromInline('// CODE');
-        }
-
         class TestType {
             @Resolver(TestResolver)
             prop = 0;
@@ -37,13 +34,6 @@ describe('Decorators: Resolver', () => {
         const FUNCTION1 = getName();
         const FUNCTION2 = getName();
         const FUNCTIONS = [FUNCTION1, FUNCTION2].join(', ');
-
-        class TestResolver extends VtlResolver {
-            dataSource = DATA_SOURCE;
-            maxBatchSize = MAX_BATCH_SIZE;
-            requestMappingTemplate = MappingTemplate.fromString('# REQUEST');
-            responseMappingTemplate = MappingTemplate.fromString('# RESPONSE');
-        }
 
         class TestType {
             @Resolver(TestResolver, FUNCTION1, FUNCTION2)

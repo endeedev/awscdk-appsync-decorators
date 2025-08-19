@@ -48,6 +48,21 @@ import { JsResolver, VtlResolver } from '@/resolvers';
 import { getName, getNames, getNumber } from '../helpers';
 
 describe('Core: Schema Binder', () => {
+    const createConstructs = (binder: SchemaBinder) => {
+        const stack = new Stack();
+        const api = new GraphqlApi(stack, 'TestApi', {
+            name: 'TestApi',
+            definition: {
+                schema: binder.schema,
+            },
+        });
+
+        return {
+            api,
+            stack,
+        };
+    };
+
     const createContext = (setup: (binder: SchemaBinder) => void) => {
         const binder = new SchemaBinder();
         const addQuerySpy = jest.spyOn(binder.schema as CodeFirstSchema, 'addQuery');
@@ -503,13 +518,7 @@ describe('Core: Schema Binder', () => {
 
             const { binder } = context;
 
-            const stack = new Stack();
-            const api = new GraphqlApi(stack, 'TestApi', {
-                name: 'TestApi',
-                definition: {
-                    schema: binder.schema,
-                },
-            });
+            const { api, stack } = createConstructs(binder);
 
             const dataSource = new NoneDataSource(stack, 'TestDataSource', {
                 api,
@@ -544,7 +553,7 @@ describe('Core: Schema Binder', () => {
                             prop: new ResolvableField({
                                 directives: [],
                                 returnType: GraphqlType.string(),
-                                dataSource: dataSource,
+                                dataSource,
                                 maxBatchSize: MAX_BATCH_SIZE,
                                 code: CODE,
                                 runtime: FunctionRuntime.JS_1_0_0,
@@ -584,7 +593,7 @@ describe('Core: Schema Binder', () => {
                             prop: new ResolvableField({
                                 directives: [],
                                 returnType: GraphqlType.string(),
-                                dataSource: dataSource,
+                                dataSource,
                                 maxBatchSize: MAX_BATCH_SIZE,
                                 requestMappingTemplate: REQUEST,
                                 responseMappingTemplate: RESPONSE,
@@ -617,7 +626,6 @@ describe('Core: Schema Binder', () => {
                             prop: new ResolvableField({
                                 directives: [],
                                 returnType: GraphqlType.string(),
-                                dataSource: dataSource,
                                 maxBatchSize: MAX_BATCH_SIZE,
                                 code: CODE,
                                 runtime: FunctionRuntime.JS_1_0_0,
@@ -625,6 +633,24 @@ describe('Core: Schema Binder', () => {
                             }),
                         },
                     }),
+                );
+            });
+        });
+
+        test('should throw if data source name is not provided', () => {
+            class TestJsResolver extends JsResolver {
+                maxBatchSize = MAX_BATCH_SIZE;
+                code = CODE;
+            }
+
+            class Query {
+                @Resolver(TestJsResolver)
+                prop = Scalar.STRING;
+            }
+
+            assertResolver(Query, ({ binder }) => {
+                expect(() => binder.bindSchema()).toThrow(
+                    new Error(`A data source is required for resolver '${TestJsResolver.name}'.`),
                 );
             });
         });
@@ -682,13 +708,7 @@ describe('Core: Schema Binder', () => {
 
             const { binder, addTypeSpy } = context;
 
-            const stack = new Stack();
-            const api = new GraphqlApi(stack, 'TestApi', {
-                name: 'TestApi',
-                definition: {
-                    schema: binder.schema,
-                },
-            });
+            const { api, stack } = createConstructs(binder);
 
             const dataSource = new NoneDataSource(stack, 'TestDataSource', {
                 api,
@@ -707,7 +727,7 @@ describe('Core: Schema Binder', () => {
                         prop: new ResolvableField({
                             directives: [],
                             returnType: GraphqlType.string(),
-                            dataSource: dataSource,
+                            dataSource,
                             code: CODE,
                             runtime: FunctionRuntime.JS_1_0_0,
                             cachingConfig: {

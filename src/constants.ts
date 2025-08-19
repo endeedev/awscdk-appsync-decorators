@@ -17,10 +17,10 @@ export const TYPE_ID = {
 export const DIRECTIVE_ID = {
     API_KEY: 'directive:id:apikey',
     COGNITO: 'directive:id:cognito',
+    CUSTOM: 'directive:id:custom',
     IAM: 'directive:id:iam',
     LAMBDA: 'directive:id:lambda',
     OIDC: 'directive:id:oidc',
-    CUSTOM: 'directive:id:custom',
     SUBSCRIBE: 'directive:id:subscribe',
 };
 
