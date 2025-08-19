@@ -1,4 +1,4 @@
-export * from './arguments';
+export * from './args';
 export * from './list';
 export * from './required';
 export * from './required-list';

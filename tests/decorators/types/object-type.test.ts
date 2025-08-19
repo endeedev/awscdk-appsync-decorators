@@ -1,90 +1,92 @@
+import { faker } from '@faker-js/faker';
+
 import { METADATA, TYPE_ID } from '@/constants';
 import { ObjectType } from '@/decorators';
 
-class TestInterface1 {}
-class TestInterface2 {}
-
-const OBJECT_NAME = 'CustomTestObject';
-const INTERFACE_NAMES = [TestInterface1.name, TestInterface2.name].join(', ');
-
 describe('Decorator: Object Type', () => {
+    class TestType1 {}
+    class TestType2 {}
+
+    const TYPE_NAME = faker.word.sample();
+    const TYPE_NAMES = [TestType1.name, TestType2.name].join(', ');
+
     describe('@ObjectType()', () => {
         @ObjectType()
-        class TestObjectType {}
+        class TestType {}
 
         test(`should set '${METADATA.TYPE.ID}' to '${TYPE_ID.OBJECT}'`, () => {
-            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestObjectType);
+            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestType);
             expect(id).toBe(TYPE_ID.OBJECT);
         });
 
-        test(`should set '${METADATA.TYPE.NAME}' to '${TestObjectType.name}'`, () => {
-            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestObjectType);
-            expect(name).toBe(TestObjectType.name);
+        test(`should set '${METADATA.TYPE.NAME}' to '${TestType.name}'`, () => {
+            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestType);
+            expect(name).toBe(TestType.name);
         });
 
         test(`should set '${METADATA.OBJECT.TYPES}' to []`, () => {
-            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestObjectType);
+            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestType);
             expect(types).toEqual([]);
         });
     });
 
     describe('@ObjectType(name)', () => {
-        @ObjectType(OBJECT_NAME)
-        class TestObjectTypeWithName {}
+        @ObjectType(TYPE_NAME)
+        class TestType {}
 
         test(`should set '${METADATA.TYPE.ID}' to '${TYPE_ID.OBJECT}'`, () => {
-            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestObjectTypeWithName);
+            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestType);
             expect(id).toBe(TYPE_ID.OBJECT);
         });
 
-        test(`should set '${METADATA.TYPE.NAME}' to '${OBJECT_NAME}'`, () => {
-            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestObjectTypeWithName);
-            expect(name).toBe(OBJECT_NAME);
+        test(`should set '${METADATA.TYPE.NAME}' to '${TYPE_NAME}'`, () => {
+            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestType);
+            expect(name).toBe(TYPE_NAME);
         });
 
         test(`should set '${METADATA.OBJECT.TYPES}' to []`, () => {
-            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestObjectTypeWithName);
+            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestType);
             expect(types).toEqual([]);
         });
     });
 
     describe('@ObjectType(types)', () => {
-        @ObjectType(TestInterface1, TestInterface2)
-        class TestObjectTypeWithInterfaces {}
+        @ObjectType(TestType1, TestType2)
+        class TestType {}
 
         test(`should set '${METADATA.TYPE.ID}' to '${TYPE_ID.OBJECT}'`, () => {
-            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestObjectTypeWithInterfaces);
+            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestType);
             expect(id).toBe(TYPE_ID.OBJECT);
         });
 
-        test(`should set '${METADATA.TYPE.NAME}' to '${TestObjectTypeWithInterfaces.name}'`, () => {
-            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestObjectTypeWithInterfaces);
-            expect(name).toBe(TestObjectTypeWithInterfaces.name);
+        test(`should set '${METADATA.TYPE.NAME}' to '${TestType.name}'`, () => {
+            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestType);
+            expect(name).toBe(TestType.name);
         });
 
-        test(`should set '${METADATA.OBJECT.TYPES}' to [${INTERFACE_NAMES}]`, () => {
-            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestObjectTypeWithInterfaces);
-            expect(types).toEqual([TestInterface1, TestInterface2]);
+        test(`should set '${METADATA.OBJECT.TYPES}' to [${TYPE_NAMES}]`, () => {
+            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestType);
+            expect(types).toEqual([TestType1, TestType2]);
         });
     });
 
     describe('@ObjectType(name, types)', () => {
-        @ObjectType(OBJECT_NAME, TestInterface1, TestInterface2)
-        class TestObjectTypeWithNameAndInterfaces {}
+        @ObjectType(TYPE_NAME, TestType1, TestType2)
+        class TestType {}
 
         test(`should set '${METADATA.TYPE.ID}' to '${TYPE_ID.OBJECT}'`, () => {
-            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestObjectTypeWithNameAndInterfaces);
+            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestType);
             expect(id).toBe(TYPE_ID.OBJECT);
         });
 
-        test(`should set '${METADATA.TYPE.NAME}' to '${OBJECT_NAME}'`, () => {
-            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestObjectTypeWithNameAndInterfaces);
-            expect(name).toBe(OBJECT_NAME);
+        test(`should set '${METADATA.TYPE.NAME}' to '${TYPE_NAME}'`, () => {
+            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestType);
+            expect(name).toBe(TYPE_NAME);
         });
 
-        test(`should set '${METADATA.OBJECT.TYPES}' to [${INTERFACE_NAMES}]`, () => {
-            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestObjectTypeWithNameAndInterfaces);
-            expect(types).toEqual([TestInterface1, TestInterface2]);
+        test(`should set '${METADATA.OBJECT.TYPES}' to [${TYPE_NAMES}]`, () => {
+            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestType);
+            expect(types).toEqual([TestType1, TestType2]);
         });
     });
 });

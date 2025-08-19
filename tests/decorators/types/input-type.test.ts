@@ -1,36 +1,38 @@
+import { faker } from '@faker-js/faker';
+
 import { METADATA, TYPE_ID } from '@/constants';
 import { InputType } from '@/decorators';
-
-const INPUT_NAME = 'CustomTestInput';
 
 describe('Decorator: Input Type', () => {
     describe('@InputType()', () => {
         @InputType()
-        class TestInputType {}
+        class TestType {}
 
         test(`should set '${METADATA.TYPE.ID}' to '${TYPE_ID.INPUT}'`, () => {
-            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestInputType);
+            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestType);
             expect(id).toBe(TYPE_ID.INPUT);
         });
 
-        test(`should set '${METADATA.TYPE.NAME}' to '${TestInputType.name}'`, () => {
-            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestInputType);
-            expect(name).toBe(TestInputType.name);
+        test(`should set '${METADATA.TYPE.NAME}' to '${TestType.name}'`, () => {
+            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestType);
+            expect(name).toBe(TestType.name);
         });
     });
 
     describe('@InputType(name)', () => {
-        @InputType(INPUT_NAME)
-        class TestInputTypeWithName {}
+        const TYPE_NAME = faker.word.sample();
+
+        @InputType(TYPE_NAME)
+        class TestType {}
 
         test(`should set '${METADATA.TYPE.ID}' to '${TYPE_ID.INPUT}'`, () => {
-            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestInputTypeWithName);
+            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestType);
             expect(id).toBe(TYPE_ID.INPUT);
         });
 
-        test(`should set '${METADATA.TYPE.NAME}' to '${INPUT_NAME}'`, () => {
-            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestInputTypeWithName);
-            expect(name).toBe(INPUT_NAME);
+        test(`should set '${METADATA.TYPE.NAME}' to '${TYPE_NAME}'`, () => {
+            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestType);
+            expect(name).toBe(TYPE_NAME);
         });
     });
 });

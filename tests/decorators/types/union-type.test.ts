@@ -1,90 +1,92 @@
+import { faker } from '@faker-js/faker';
+
 import { METADATA, TYPE_ID } from '@/constants';
 import { UnionType } from '@/decorators';
 
-class TestObject1 {}
-class TestObject2 {}
-
-const UNION_NAME = 'CustomTestUnion';
-const OBJECT_NAMES = [TestObject1.name, TestObject2.name].join(', ');
-
 describe('Decorator: Union Type', () => {
+    class TestType1 {}
+    class TestType2 {}
+
+    const TYPE_NAME = faker.word.sample();
+    const TYPE_NAMES = [TestType1.name, TestType2.name].join(', ');
+
     describe('@UnionType()', () => {
         @UnionType()
-        class TestUnionType {}
+        class TestType {}
 
         test(`should set '${METADATA.TYPE.ID}' to '${TYPE_ID.UNION}'`, () => {
-            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestUnionType);
+            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestType);
             expect(id).toBe(TYPE_ID.UNION);
         });
 
-        test(`should set '${METADATA.TYPE.NAME}' to '${TestUnionType.name}'`, () => {
-            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestUnionType);
-            expect(name).toBe(TestUnionType.name);
+        test(`should set '${METADATA.TYPE.NAME}' to '${TestType.name}'`, () => {
+            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestType);
+            expect(name).toBe(TestType.name);
         });
 
         test(`should set '${METADATA.UNION.TYPES}' to []`, () => {
-            const types = Reflect.getMetadata(METADATA.UNION.TYPES, TestUnionType);
+            const types = Reflect.getMetadata(METADATA.UNION.TYPES, TestType);
             expect(types).toEqual([]);
         });
     });
 
     describe('@UnionType(name)', () => {
-        @UnionType(UNION_NAME)
-        class TestUnionTypeWithName {}
+        @UnionType(TYPE_NAME)
+        class TestType {}
 
         test(`should set '${METADATA.TYPE.ID}' to '${TYPE_ID.UNION}'`, () => {
-            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestUnionTypeWithName);
+            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestType);
             expect(id).toBe(TYPE_ID.UNION);
         });
 
-        test(`should set '${METADATA.TYPE.NAME}' to '${UNION_NAME}'`, () => {
-            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestUnionTypeWithName);
-            expect(name).toBe(UNION_NAME);
+        test(`should set '${METADATA.TYPE.NAME}' to '${TYPE_NAME}'`, () => {
+            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestType);
+            expect(name).toBe(TYPE_NAME);
         });
 
         test(`should set '${METADATA.UNION.TYPES}' to []`, () => {
-            const types = Reflect.getMetadata(METADATA.UNION.TYPES, TestUnionTypeWithName);
+            const types = Reflect.getMetadata(METADATA.UNION.TYPES, TestType);
             expect(types).toEqual([]);
         });
     });
 
     describe('@UnionType(types)', () => {
-        @UnionType(TestObject1, TestObject2)
-        class TestUnionTypeWithInterfaces {}
+        @UnionType(TestType1, TestType2)
+        class TestType {}
 
         test(`should set '${METADATA.TYPE.ID}' to '${TYPE_ID.UNION}'`, () => {
-            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestUnionTypeWithInterfaces);
+            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestType);
             expect(id).toBe(TYPE_ID.UNION);
         });
 
-        test(`should set '${METADATA.TYPE.NAME}' to '${TestUnionTypeWithInterfaces.name}'`, () => {
-            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestUnionTypeWithInterfaces);
-            expect(name).toBe(TestUnionTypeWithInterfaces.name);
+        test(`should set '${METADATA.TYPE.NAME}' to '${TestType.name}'`, () => {
+            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestType);
+            expect(name).toBe(TestType.name);
         });
 
-        test(`should set '${METADATA.UNION.TYPES}' to [${OBJECT_NAMES}]`, () => {
-            const types = Reflect.getMetadata(METADATA.UNION.TYPES, TestUnionTypeWithInterfaces);
-            expect(types).toEqual([TestObject1, TestObject2]);
+        test(`should set '${METADATA.UNION.TYPES}' to [${TYPE_NAMES}]`, () => {
+            const types = Reflect.getMetadata(METADATA.UNION.TYPES, TestType);
+            expect(types).toEqual([TestType1, TestType2]);
         });
     });
 
     describe('@UnionType(name, types)', () => {
-        @UnionType(UNION_NAME, TestObject1, TestObject2)
-        class TestUnionTypeWithNameAndInterfaces {}
+        @UnionType(TYPE_NAME, TestType1, TestType2)
+        class TestType {}
 
         test(`should set '${METADATA.TYPE.ID}' to '${TYPE_ID.UNION}'`, () => {
-            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestUnionTypeWithNameAndInterfaces);
+            const id = Reflect.getMetadata(METADATA.TYPE.ID, TestType);
             expect(id).toBe(TYPE_ID.UNION);
         });
 
-        test(`should set '${METADATA.TYPE.NAME}' to '${UNION_NAME}'`, () => {
-            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestUnionTypeWithNameAndInterfaces);
-            expect(name).toBe(UNION_NAME);
+        test(`should set '${METADATA.TYPE.NAME}' to '${TYPE_NAME}'`, () => {
+            const name = Reflect.getMetadata(METADATA.TYPE.NAME, TestType);
+            expect(name).toBe(TYPE_NAME);
         });
 
-        test(`should set '${METADATA.UNION.TYPES}' to [${OBJECT_NAMES}]`, () => {
-            const types = Reflect.getMetadata(METADATA.UNION.TYPES, TestUnionTypeWithNameAndInterfaces);
-            expect(types).toEqual([TestObject1, TestObject2]);
+        test(`should set '${METADATA.UNION.TYPES}' to [${TYPE_NAMES}]`, () => {
+            const types = Reflect.getMetadata(METADATA.UNION.TYPES, TestType);
+            expect(types).toEqual([TestType1, TestType2]);
         });
     });
 });
