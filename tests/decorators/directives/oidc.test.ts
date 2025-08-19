@@ -1,7 +1,7 @@
 import { DIRECTIVE_ID, METADATA } from '@/constants';
 import { Custom, Oidc } from '@/decorators';
 
-describe('Decorator: OIDC', () => {
+describe('Decorators: OIDC', () => {
     describe('@Oidc()', () => {
         @Oidc()
         @Custom('')

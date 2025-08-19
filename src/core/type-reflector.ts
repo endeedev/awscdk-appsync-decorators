@@ -62,8 +62,8 @@ export class TypeReflector {
         return fieldInfos;
     }
 
-    static getMetadataTypeInfos(typeInfo: TypeInfo, metadataKey: string): TypeInfo[] {
-        const types = this.getMetadata<Type<object>[]>(metadataKey, typeInfo);
+    static getMetadataTypeInfos(metadataKey: string, typeInfo: TypeInfo, propertyInfo?: PropertyInfo): TypeInfo[] {
+        const types = this.getMetadata<Type<object>[]>(metadataKey, typeInfo, propertyInfo);
 
         if (types) {
             return types.map((type) => this.getTypeInfo(type));

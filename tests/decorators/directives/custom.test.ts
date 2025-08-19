@@ -3,7 +3,7 @@ import { Custom } from '@/decorators';
 
 import { getName } from '../../helpers';
 
-describe('Decorator: Custom', () => {
+describe('Decorators: Custom', () => {
     describe('@Custom(statement)', () => {
         const STATEMENT = getName();
 

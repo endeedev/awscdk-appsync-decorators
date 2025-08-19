@@ -1,7 +1,7 @@
 import { METADATA } from '@/constants';
 import { RequiredList } from '@/decorators';
 
-describe('Decorator: Required List', () => {
+describe('Decorators: Required List', () => {
     describe('@RequiredList()', () => {
         class TestType {
             @RequiredList()

@@ -6,7 +6,7 @@ import { JsOperation, VtlOperation } from '@/resolvers';
 
 import { getName, getTypeNames } from '../../helpers';
 
-describe('Decorator: Resolver', () => {
+describe('Decorators: Resolver', () => {
     describe('@Resolver(operation, operations)', () => {
         const DATA_SOURCE = getName();
 

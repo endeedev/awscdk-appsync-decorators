@@ -1,7 +1,7 @@
 import { DIRECTIVE_ID, METADATA } from '@/constants';
 import { ApiKey, Custom } from '@/decorators';
 
-describe('Decorator: API Key', () => {
+describe('Decorators: API Key', () => {
     describe('@ApiKey()', () => {
         @ApiKey()
         @Custom('')

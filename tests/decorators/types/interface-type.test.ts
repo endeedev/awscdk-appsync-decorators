@@ -3,7 +3,7 @@ import { InterfaceType } from '@/decorators';
 
 import { getName } from '../../helpers';
 
-describe('Decorator: Interface Type', () => {
+describe('Decorators: Interface Type', () => {
     describe('@InterfaceType()', () => {
         @InterfaceType()
         class TestType {}

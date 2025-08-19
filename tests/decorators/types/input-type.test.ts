@@ -3,7 +3,7 @@ import { InputType } from '@/decorators';
 
 import { getName } from '../../helpers';
 
-describe('Decorator: Input Type', () => {
+describe('Decorators: Input Type', () => {
     describe('@InputType()', () => {
         @InputType()
         class TestType {}

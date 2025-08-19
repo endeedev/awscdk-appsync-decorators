@@ -3,7 +3,7 @@ import { EnumType } from '@/decorators';
 
 import { getName } from '../../helpers';
 
-describe('Decorator: Enum Type', () => {
+describe('Decorators: Enum Type', () => {
     describe('@EnumType()', () => {
         @EnumType()
         class TestType {}

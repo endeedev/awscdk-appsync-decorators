@@ -1,3 +1,5 @@
+import { Code } from 'aws-cdk-lib/aws-appsync';
+
 import { DirectiveInfo, Scalar, Type } from '@/common';
 import { DIRECTIVE_ID, METADATA, TYPE_ID } from '@/constants';
 import { TypeReflector } from '@/core';
@@ -13,8 +15,10 @@ import {
     Oidc,
     Required,
     RequiredList,
+    Resolver,
     UnionType,
 } from '@/decorators';
+import { JsOperation } from '@/resolvers';
 
 import { getName, getNames, getScalar, getTypeInfos } from '../helpers';
 
@@ -276,7 +280,7 @@ describe('Core: Type Reflector', () => {
         });
     });
 
-    describe('getMetadataTypeInfos(typeInfo, metadataKey)', () => {
+    describe('getMetadataTypeInfos(metadataKey, typeInfo, propertyInfo)', () => {
         class TestMetadataType1 {}
         class TestMetadataType2 {}
 
@@ -287,7 +291,7 @@ describe('Core: Type Reflector', () => {
             class TestType {}
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METADATA.TYPE.OBJECT_TYPES);
+            const typeInfos = TypeReflector.getMetadataTypeInfos(METADATA.TYPE.OBJECT_TYPES, typeInfo);
 
             expect(typeInfos).toEqual(TYPE_INFOS);
         });
@@ -297,7 +301,38 @@ describe('Core: Type Reflector', () => {
             class TestType {}
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METADATA.TYPE.UNION_TYPES);
+            const typeInfos = TypeReflector.getMetadataTypeInfos(METADATA.TYPE.UNION_TYPES, typeInfo);
+
+            expect(typeInfos).toEqual(TYPE_INFOS);
+        });
+
+        test('should return resolver operation type infos', () => {
+            const DATA_SOURCE = getName();
+            const SCALAR = getScalar();
+
+            class TestOperation1 extends JsOperation {
+                dataSourceName = DATA_SOURCE;
+                code = Code.fromInline('// CODE');
+            }
+
+            class TestOperation2 extends JsOperation {
+                dataSourceName = DATA_SOURCE;
+                code = Code.fromInline('// CODE');
+            }
+
+            class TestType {
+                @Resolver(TestOperation1, TestOperation2)
+                prop = SCALAR;
+            }
+
+            const TYPE_INFOS = getTypeInfos(TestOperation1, TestOperation2);
+
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const typeInfos = TypeReflector.getMetadataTypeInfos(METADATA.COMMON.RESOLVER_OPERATIONS, typeInfo, {
+                propertyName: 'prop',
+                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
+                declaringTypeInfo: typeInfo,
+            });
 
             expect(typeInfos).toEqual(TYPE_INFOS);
         });
@@ -308,7 +343,7 @@ describe('Core: Type Reflector', () => {
             class TestType {}
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METDATA_KEY);
+            const typeInfos = TypeReflector.getMetadataTypeInfos(METDATA_KEY, typeInfo);
 
             expect(typeInfos).toHaveLength(0);
         });

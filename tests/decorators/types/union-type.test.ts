@@ -3,7 +3,7 @@ import { UnionType } from '@/decorators';
 
 import { getName, getTypeNames } from '../../helpers';
 
-describe('Decorator: Union Type', () => {
+describe('Decorators: Union Type', () => {
     class TestType1 {}
     class TestType2 {}
 

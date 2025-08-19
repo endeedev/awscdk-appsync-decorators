@@ -3,7 +3,7 @@ import { Cognito, Custom } from '@/decorators';
 
 import { getName, getNames } from '../../helpers';
 
-describe('Decorator: Cognito', () => {
+describe('Decorators: Cognito', () => {
     describe('@Cognito(group, groups)', () => {
         const GROUP = getName();
         const GROUPS = getNames();
