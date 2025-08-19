@@ -1,3 +1,4 @@
+import { Duration } from 'aws-cdk-lib';
 import { AppsyncFunction, BaseDataSource, FunctionRuntime, ISchema } from 'aws-cdk-lib/aws-appsync';
 import {
     CodeFirstSchema,
@@ -173,7 +174,14 @@ export class SchemaBinder {
             return {
                 ...output,
                 [propertyName]: resolverInfo
-                    ? this.createResolvableField(fieldOptions, resolverInfo, dataSources, functions)
+                    ? this.createResolvableField(
+                          typeInfo,
+                          propertyInfo,
+                          fieldOptions,
+                          resolverInfo,
+                          dataSources,
+                          functions,
+                      )
                     : new Field(fieldOptions),
             };
         }, {});
@@ -254,6 +262,8 @@ export class SchemaBinder {
     }
 
     private createResolvableField(
+        typeInfo: TypeInfo,
+        propertyInfo: PropertyInfo,
         fieldOptions: FieldOptions,
         resolverInfo: ResolverInfo,
         dataSources: DataSources,
@@ -263,7 +273,7 @@ export class SchemaBinder {
 
         const instance = new resolverType();
 
-        // Match the data source for the resolver
+        // Match the data source for the resolver and create the field options
         const { dataSource: dataSourceName, maxBatchSize } = instance;
 
         const dataSource = dataSources[dataSourceName];
@@ -278,7 +288,21 @@ export class SchemaBinder {
             maxBatchSize,
         };
 
-        // Determine the resolver operation type and add the props
+        // Determine if caching options are needed
+        const cacheInfo = TypeReflector.getMetadataCacheInfo(typeInfo, propertyInfo);
+
+        if (cacheInfo) {
+            const { ttl, keys: cachingKeys } = cacheInfo;
+            resolvableFieldOptions = {
+                ...resolvableFieldOptions,
+                cachingConfig: {
+                    ttl: Duration.seconds(ttl),
+                    cachingKeys,
+                },
+            };
+        }
+
+        // Determine the resolver operation type
         const { runtime } = instance;
 
         if (runtime === RESOLVER_RUNTIME.JS) {

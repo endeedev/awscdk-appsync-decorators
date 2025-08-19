@@ -1,4 +1,5 @@
 export * from './arg-info';
+export * from './cache-info';
 export * from './directive-info';
 export * from './field-info';
 export * from './graphql-type';

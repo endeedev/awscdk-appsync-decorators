@@ -1,5 +1,6 @@
 import {
     ArgInfo,
+    CacheInfo,
     DirectiveInfo,
     FieldInfo,
     ModifierInfo,
@@ -115,6 +116,20 @@ export class TypeReflector {
             return {
                 resolverType,
                 functions: functions as string[],
+            };
+        }
+
+        return undefined;
+    }
+
+    static getMetadataCacheInfo(typeInfo: TypeInfo, propertyInfo: PropertyInfo): CacheInfo | undefined {
+        const ttl = this.getMetadata<number>(METADATA.COMMON.CACHE_TTL, typeInfo, propertyInfo);
+
+        if (ttl) {
+            const keys = this.getMetadata<string[]>(METADATA.COMMON.CACHE_KEYS, typeInfo, propertyInfo);
+            return {
+                ttl,
+                keys: keys as string[],
             };
         }
 

@@ -43,6 +43,8 @@ export const METADATA = {
         REQUIRED_LIST: 'metadata:required:list',
         RESOLVER_TYPE: 'metadata:resolver:type',
         RESOLVER_FUNCTIONS: 'metadata:resolver:functions',
+        CACHE_TTL: 'metadata:cache:ttl',
+        CACHE_KEYS: 'metadata:cache:keys',
     },
     TYPE: {
         ID: 'metadata:type:id',

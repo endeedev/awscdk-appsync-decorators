@@ -1,4 +1,4 @@
-import { Stack } from 'aws-cdk-lib';
+import { Duration, Stack } from 'aws-cdk-lib';
 import {
     AppsyncFunction,
     BaseDataSource,
@@ -27,6 +27,7 @@ import { SchemaBinder } from '@/core';
 import {
     ApiKey,
     Args,
+    Cache,
     Cognito,
     Custom,
     EnumType,
@@ -44,7 +45,7 @@ import {
 } from '@/decorators';
 import { JsResolver, VtlResolver } from '@/resolvers';
 
-import { getName, getNumber } from '../helpers';
+import { getName, getNames, getNumber } from '../helpers';
 
 describe('Core: Schema Binder', () => {
     const createContext = (setup: (binder: SchemaBinder) => void) => {
@@ -654,6 +655,69 @@ describe('Core: Schema Binder', () => {
                     }),
                 ).toThrow(new Error(`Unable to find function '${FUNCTION}'.`));
             });
+        });
+    });
+
+    describe('Cache', () => {
+        test('should add caching config', () => {
+            const TTL = getNumber();
+            const KEYS = getNames();
+            const DATA_SOURCE = getName();
+            const CODE = Code.fromInline('// CODE');
+
+            class TestJsResolver extends JsResolver {
+                dataSource = DATA_SOURCE;
+                code = CODE;
+            }
+
+            class Query {
+                @Cache(TTL, ...KEYS)
+                @Resolver(TestJsResolver)
+                prop = Scalar.STRING;
+            }
+
+            const context = createContext((binder) => {
+                binder.addQuery(Query);
+            });
+
+            const { binder, addTypeSpy } = context;
+
+            const stack = new Stack();
+            const api = new GraphqlApi(stack, 'TestApi', {
+                name: 'TestApi',
+                definition: {
+                    schema: binder.schema,
+                },
+            });
+
+            const dataSource = new NoneDataSource(stack, 'TestDataSource', {
+                api,
+                name: DATA_SOURCE,
+            });
+
+            binder.bindSchema({
+                dataSources: {
+                    [DATA_SOURCE]: dataSource,
+                },
+            });
+
+            expect(addTypeSpy).toHaveBeenCalledWith(
+                new SchemaObjectType(TYPE_NAME.QUERY, {
+                    definition: {
+                        prop: new ResolvableField({
+                            directives: [],
+                            returnType: GraphqlType.string(),
+                            dataSource: dataSource,
+                            code: CODE,
+                            runtime: FunctionRuntime.JS_1_0_0,
+                            cachingConfig: {
+                                ttl: Duration.seconds(TTL),
+                                cachingKeys: KEYS,
+                            },
+                        }),
+                    },
+                }),
+            );
         });
     });
 });

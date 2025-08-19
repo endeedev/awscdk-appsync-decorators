@@ -6,6 +6,7 @@ import { TypeReflector } from '@/core';
 import {
     ApiKey,
     Args,
+    Cache,
     Cognito,
     Custom,
     Iam,
@@ -438,13 +439,13 @@ describe('Core: Type Reflector', () => {
             }
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const resolveInfo = TypeReflector.getMetadataResolverInfo(typeInfo, {
+            const resolverInfo = TypeReflector.getMetadataResolverInfo(typeInfo, {
                 propertyName: 'prop',
                 returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
                 declaringTypeInfo: typeInfo,
             });
 
-            expect(resolveInfo).toEqual({
+            expect(resolverInfo).toEqual({
                 resolverType: TestResolver,
                 functions: [FUNCTION1, FUNCTION2],
             });
@@ -456,13 +457,53 @@ describe('Core: Type Reflector', () => {
             }
 
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const resolveInfo = TypeReflector.getMetadataResolverInfo(typeInfo, {
+            const resolverInfo = TypeReflector.getMetadataResolverInfo(typeInfo, {
                 propertyName: 'prop',
                 returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
                 declaringTypeInfo: typeInfo,
             });
 
-            expect(resolveInfo).toBeUndefined();
+            expect(resolverInfo).toBeUndefined();
+        });
+    });
+
+    describe('getMetadataCacheInfo(typeInfo, propertyInfo)', () => {
+        const TTL = getNumber();
+        const KEYS = getNames();
+        const SCALAR = getScalar();
+
+        test('should return cache info', () => {
+            class TestType {
+                @Cache(TTL, ...KEYS)
+                prop = SCALAR;
+            }
+
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const cacheInfo = TypeReflector.getMetadataCacheInfo(typeInfo, {
+                propertyName: 'prop',
+                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
+                declaringTypeInfo: typeInfo,
+            });
+
+            expect(cacheInfo).toEqual({
+                ttl: TTL,
+                keys: KEYS,
+            });
+        });
+
+        test('should return undefined if no cache', () => {
+            class TestType {
+                prop = SCALAR;
+            }
+
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const cacheInfo = TypeReflector.getMetadataCacheInfo(typeInfo, {
+                propertyName: 'prop',
+                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
+                declaringTypeInfo: typeInfo,
+            });
+
+            expect(cacheInfo).toBeUndefined();
         });
     });
 });
