@@ -7,8 +7,8 @@ describe('Resolvers: VTL Operation', () => {
     describe('constructor()', () => {
         class TestOperation extends VtlOperation {
             dataSourceName = '';
-            requestMappingTemplate = MappingTemplate.fromString('');
-            responseMappingTemplate = MappingTemplate.fromString('');
+            requestMappingTemplate = MappingTemplate.fromString('# REQUEST');
+            responseMappingTemplate = MappingTemplate.fromString('# RESPONSE');
         }
 
         test(`should set runtime to '${RESOLVER_RUNTIME.VTL}'`, () => {

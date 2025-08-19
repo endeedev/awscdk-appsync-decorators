@@ -306,37 +306,6 @@ describe('Core: Type Reflector', () => {
             expect(typeInfos).toEqual(TYPE_INFOS);
         });
 
-        test('should return resolver operation type infos', () => {
-            const DATA_SOURCE = getName();
-            const SCALAR = getScalar();
-
-            class TestOperation1 extends JsOperation {
-                dataSourceName = DATA_SOURCE;
-                code = Code.fromInline('// CODE');
-            }
-
-            class TestOperation2 extends JsOperation {
-                dataSourceName = DATA_SOURCE;
-                code = Code.fromInline('// CODE');
-            }
-
-            class TestType {
-                @Resolver(TestOperation1, TestOperation2)
-                prop = SCALAR;
-            }
-
-            const TYPE_INFOS = getTypeInfos(TestOperation1, TestOperation2);
-
-            const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const typeInfos = TypeReflector.getMetadataTypeInfos(METADATA.COMMON.RESOLVER_OPERATIONS, typeInfo, {
-                propertyName: 'prop',
-                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
-                declaringTypeInfo: typeInfo,
-            });
-
-            expect(typeInfos).toEqual(TYPE_INFOS);
-        });
-
         test('should return empty if no types', () => {
             const METDATA_KEY = getName();
 
@@ -446,6 +415,52 @@ describe('Core: Type Reflector', () => {
             });
 
             expect(directiveInfos).toHaveLength(0);
+        });
+    });
+
+    describe('getMetadataResolverInfo(typeInfo, propertyInfo)', () => {
+        const DATA_SOURCE = getName();
+        const SCALAR = getScalar();
+        const FUNCTION1 = getName();
+        const FUNCTION2 = getName();
+
+        class TestOperation extends JsOperation {
+            dataSourceName = DATA_SOURCE;
+            code = Code.fromInline('// CODE');
+        }
+
+        test('should return resolve info', () => {
+            class TestType {
+                @Resolver(TestOperation, FUNCTION1, FUNCTION2)
+                prop = SCALAR;
+            }
+
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const resolveInfo = TypeReflector.getMetadataResolverInfo(typeInfo, {
+                propertyName: 'prop',
+                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
+                declaringTypeInfo: typeInfo,
+            });
+
+            expect(resolveInfo).toEqual({
+                operation: TestOperation,
+                functions: [FUNCTION1, FUNCTION2],
+            });
+        });
+
+        test('should return undefined if no resolver', () => {
+            class TestType {
+                prop = SCALAR;
+            }
+
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const resolveInfo = TypeReflector.getMetadataResolverInfo(typeInfo, {
+                propertyName: 'prop',
+                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
+                declaringTypeInfo: typeInfo,
+            });
+
+            expect(resolveInfo).toBeUndefined();
         });
     });
 });

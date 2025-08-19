@@ -1,5 +1,16 @@
-import { ArgInfo, DirectiveInfo, FieldInfo, ModifierInfo, PropertyInfo, Scalar, Type, TypeInfo } from '@/common';
+import {
+    ArgInfo,
+    DirectiveInfo,
+    FieldInfo,
+    ModifierInfo,
+    PropertyInfo,
+    ResolverInfo,
+    Scalar,
+    Type,
+    TypeInfo,
+} from '@/common';
 import { DIRECTIVE_ID, METADATA, TYPE_ID } from '@/constants';
+import { OperationBase } from '@/resolvers';
 
 type DirectiveFactory = (typeInfo: TypeInfo, propertyInfo?: PropertyInfo) => Record<string, unknown>;
 
@@ -62,8 +73,8 @@ export class TypeReflector {
         return fieldInfos;
     }
 
-    static getMetadataTypeInfos(metadataKey: string, typeInfo: TypeInfo, propertyInfo?: PropertyInfo): TypeInfo[] {
-        const types = this.getMetadata<Type<object>[]>(metadataKey, typeInfo, propertyInfo);
+    static getMetadataTypeInfos(metadataKey: string, typeInfo: TypeInfo): TypeInfo[] {
+        const types = this.getMetadata<Type<object>[]>(metadataKey, typeInfo);
 
         if (types) {
             return types.map((type) => this.getTypeInfo(type));
@@ -88,6 +99,20 @@ export class TypeReflector {
         }
 
         return [];
+    }
+
+    static getMetadataResolverInfo(typeInfo: TypeInfo, propertyInfo: PropertyInfo): ResolverInfo | undefined {
+        const operation = this.getMetadata<OperationBase>(METADATA.COMMON.RESOLVER_OPERATION, typeInfo, propertyInfo);
+
+        if (operation) {
+            const functions = this.getMetadata<string[]>(METADATA.COMMON.RESOLVER_FUNCTIONS, typeInfo, propertyInfo);
+            return {
+                operation,
+                functions,
+            };
+        }
+
+        return undefined;
     }
 
     private static getDirectiveContext(
