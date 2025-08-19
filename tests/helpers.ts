@@ -3,6 +3,8 @@ import { faker } from '@faker-js/faker';
 import { Scalar, Type } from '@/common';
 import { TypeReflector } from '@/core';
 
+export const getNumber = () => faker.number.int();
+
 export const getName = () => faker.word.sample();
 
 export const getNames = () => faker.helpers.multiple(() => getName());

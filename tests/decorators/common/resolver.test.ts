@@ -4,14 +4,16 @@ import { METADATA } from '@/constants';
 import { Resolver } from '@/decorators';
 import { JsResolver, VtlResolver } from '@/resolvers';
 
-import { getName } from '../../helpers';
+import { getName, getNumber } from '../../helpers';
 
 describe('Decorators: Resolver', () => {
     const DATA_SOURCE = getName();
+    const MAX_BATCH_SIZE = getNumber();
 
     describe('@Resolver(type)', () => {
         class TestResolver extends JsResolver {
             dataSource = DATA_SOURCE;
+            maxBatchSize = MAX_BATCH_SIZE;
             code = Code.fromInline('// CODE');
         }
 
@@ -38,6 +40,7 @@ describe('Decorators: Resolver', () => {
 
         class TestResolver extends VtlResolver {
             dataSource = DATA_SOURCE;
+            maxBatchSize = MAX_BATCH_SIZE;
             requestMappingTemplate = MappingTemplate.fromString('# REQUEST');
             responseMappingTemplate = MappingTemplate.fromString('# RESPONSE');
         }

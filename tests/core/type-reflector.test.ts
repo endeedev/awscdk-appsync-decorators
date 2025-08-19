@@ -20,7 +20,7 @@ import {
 } from '@/decorators';
 import { JsResolver } from '@/resolvers';
 
-import { getName, getNames, getScalar, getTypeInfos } from '../helpers';
+import { getName, getNames, getNumber, getScalar, getTypeInfos } from '../helpers';
 
 describe('Core: Type Reflector', () => {
     describe('getTypeInfo(scalar)', () => {
@@ -420,12 +420,14 @@ describe('Core: Type Reflector', () => {
 
     describe('getMetadataResolverInfo(typeInfo, propertyInfo)', () => {
         const DATA_SOURCE = getName();
+        const MAX_BATCH_SIZE = getNumber();
         const SCALAR = getScalar();
         const FUNCTION1 = getName();
         const FUNCTION2 = getName();
 
         class TestResolver extends JsResolver {
             dataSource = DATA_SOURCE;
+            maxBatchSize = MAX_BATCH_SIZE;
             code = Code.fromInline('// CODE');
         }
 

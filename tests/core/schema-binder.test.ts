@@ -44,7 +44,7 @@ import {
 } from '@/decorators';
 import { JsResolver, VtlResolver } from '@/resolvers';
 
-import { getName } from '../helpers';
+import { getName, getNumber } from '../helpers';
 
 describe('Core: Schema Binder', () => {
     const createContext = (setup: (binder: SchemaBinder) => void) => {
@@ -478,11 +478,13 @@ describe('Core: Schema Binder', () => {
 
     describe('Resolvers', () => {
         const DATA_SOURCE = getName();
+        const MAX_BATCH_SIZE = getNumber();
         const FUNCTION = getName();
         const CODE = Code.fromInline('// CODE');
 
         class TestJsResolver extends JsResolver {
             dataSource = DATA_SOURCE;
+            maxBatchSize = MAX_BATCH_SIZE;
             code = CODE;
         }
 
@@ -542,6 +544,7 @@ describe('Core: Schema Binder', () => {
                                 directives: [],
                                 returnType: GraphqlType.string(),
                                 dataSource: dataSource,
+                                maxBatchSize: MAX_BATCH_SIZE,
                                 code: CODE,
                                 runtime: FunctionRuntime.JS_1_0_0,
                             }),
@@ -557,6 +560,7 @@ describe('Core: Schema Binder', () => {
 
             class TestVtlResolver extends VtlResolver {
                 dataSource = DATA_SOURCE;
+                maxBatchSize = MAX_BATCH_SIZE;
                 requestMappingTemplate = REQUEST;
                 responseMappingTemplate = RESPONSE;
             }
@@ -580,6 +584,7 @@ describe('Core: Schema Binder', () => {
                                 directives: [],
                                 returnType: GraphqlType.string(),
                                 dataSource: dataSource,
+                                maxBatchSize: MAX_BATCH_SIZE,
                                 requestMappingTemplate: REQUEST,
                                 responseMappingTemplate: RESPONSE,
                             }),
@@ -612,6 +617,7 @@ describe('Core: Schema Binder', () => {
                                 directives: [],
                                 returnType: GraphqlType.string(),
                                 dataSource: dataSource,
+                                maxBatchSize: MAX_BATCH_SIZE,
                                 code: CODE,
                                 runtime: FunctionRuntime.JS_1_0_0,
                                 pipelineConfig: [appSyncFunction],

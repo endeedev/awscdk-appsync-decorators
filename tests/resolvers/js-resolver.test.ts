@@ -7,6 +7,7 @@ describe('Resolvers: JS Resolver', () => {
     describe('constructor()', () => {
         class TestResolver extends JsResolver {
             dataSource = '';
+            maxBatchSize = 0;
             code = Code.fromInline('// CODE');
         }
 

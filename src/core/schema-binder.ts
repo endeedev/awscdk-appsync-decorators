@@ -264,7 +264,7 @@ export class SchemaBinder {
         const instance = new resolverType();
 
         // Match the data source for the resolver
-        const { dataSource: dataSourceName } = instance;
+        const { dataSource: dataSourceName, maxBatchSize } = instance;
 
         const dataSource = dataSources[dataSourceName];
 
@@ -275,6 +275,7 @@ export class SchemaBinder {
         let resolvableFieldOptions: ResolvableFieldOptions = {
             ...fieldOptions,
             dataSource,
+            maxBatchSize,
         };
 
         // Determine the resolver operation type and add the props
