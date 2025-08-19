@@ -34,7 +34,7 @@ export const METADATA = {
         LIST: 'metadata:list',
         REQUIRED: 'metadata:required',
         REQUIRED_LIST: 'metadata:required:list',
-        RESOLVER: 'metadata:resolver',
+        RESOLVER_TYPE: 'metadata:resolver:type',
         RESOLVER_FUNCTIONS: 'metadata:resolver:functions',
     },
     TYPE: {

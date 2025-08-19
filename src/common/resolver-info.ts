@@ -3,6 +3,6 @@ import { ResolverBase } from '@/resolvers';
 import { Type } from './type';
 
 export interface ResolverInfo {
-    readonly resolver: Type<ResolverBase>;
+    readonly resolverType: Type<ResolverBase>;
     readonly functions: string[];
 }

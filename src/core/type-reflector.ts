@@ -102,12 +102,12 @@ export class TypeReflector {
     }
 
     static getMetadataResolverInfo(typeInfo: TypeInfo, propertyInfo: PropertyInfo): ResolverInfo | undefined {
-        const resolver = this.getMetadata<Type<ResolverBase>>(METADATA.COMMON.RESOLVER, typeInfo, propertyInfo);
+        const resolverType = this.getMetadata<Type<ResolverBase>>(METADATA.COMMON.RESOLVER_TYPE, typeInfo, propertyInfo);
 
-        if (resolver) {
+        if (resolverType) {
             const functions = this.getMetadata<string[]>(METADATA.COMMON.RESOLVER_FUNCTIONS, typeInfo, propertyInfo);
             return {
-                resolver,
+                resolverType,
                 functions: functions as string[],
             };
         }

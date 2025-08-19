@@ -9,7 +9,7 @@ import { getName } from '../../helpers';
 describe('Decorators: Resolver', () => {
     const DATA_SOURCE = getName();
 
-    describe('@Resolver(resolver)', () => {
+    describe('@Resolver(type)', () => {
         class TestResolver extends JsResolver {
             dataSource = DATA_SOURCE;
             code = Code.fromInline('// CODE');
@@ -20,9 +20,9 @@ describe('Decorators: Resolver', () => {
             prop = 0;
         }
 
-        test(`should set '${METADATA.COMMON.RESOLVER}' to [${TestResolver.name}]`, () => {
-            const resolver = Reflect.getMetadata(METADATA.COMMON.RESOLVER, TestType.prototype, 'prop');
-            expect(resolver).toEqual(TestResolver);
+        test(`should set '${METADATA.COMMON.RESOLVER_TYPE}' to [${TestResolver.name}]`, () => {
+            const type = Reflect.getMetadata(METADATA.COMMON.RESOLVER_TYPE, TestType.prototype, 'prop');
+            expect(type).toEqual(TestResolver);
         });
 
         test(`should set '${METADATA.COMMON.RESOLVER_FUNCTIONS}' to []`, () => {
@@ -31,7 +31,7 @@ describe('Decorators: Resolver', () => {
         });
     });
 
-    describe('@Resolver(resolver, functions)', () => {
+    describe('@Resolver(type, functions)', () => {
         const FUNCTION1 = getName();
         const FUNCTION2 = getName();
         const FUNCTIONS = [FUNCTION1, FUNCTION2].join(', ');
@@ -47,9 +47,9 @@ describe('Decorators: Resolver', () => {
             prop = 0;
         }
 
-        test(`should set '${METADATA.COMMON.RESOLVER}' to [${TestResolver.name}]`, () => {
-            const resolver = Reflect.getMetadata(METADATA.COMMON.RESOLVER, TestType.prototype, 'prop');
-            expect(resolver).toEqual(TestResolver);
+        test(`should set '${METADATA.COMMON.RESOLVER_TYPE}' to [${TestResolver.name}]`, () => {
+            const type = Reflect.getMetadata(METADATA.COMMON.RESOLVER_TYPE, TestType.prototype, 'prop');
+            expect(type).toEqual(TestResolver);
         });
 
         test(`should set '${METADATA.COMMON.RESOLVER_FUNCTIONS}' to [${FUNCTIONS}]`, () => {

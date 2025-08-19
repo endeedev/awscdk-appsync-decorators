@@ -443,7 +443,7 @@ describe('Core: Type Reflector', () => {
             });
 
             expect(resolveInfo).toEqual({
-                resolver: TestResolver,
+                resolverType: TestResolver,
                 functions: [FUNCTION1, FUNCTION2],
             });
         });
