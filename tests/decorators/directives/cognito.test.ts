@@ -1,55 +1,46 @@
 import { DIRECTIVE_ID, METADATA } from '@/constants';
-import { Cognito } from '@/decorators';
+import { Cognito, Custom } from '@/decorators';
 
-import { getNames } from '../../helpers';
+import { getName, getNames } from '../../helpers';
 
 describe('Decorator: Cognito', () => {
-    describe('@Cognito()', () => {
-        @Cognito()
-        class TestType {
-            @Cognito()
-            prop = 0;
-        }
-
-        test(`should set '${METADATA.DIRECTIVE.ID}' to '${DIRECTIVE_ID.COGNITO}' for class`, () => {
-            const id = Reflect.getMetadata(METADATA.DIRECTIVE.ID, TestType);
-            expect(id).toBe(DIRECTIVE_ID.COGNITO);
-        });
-
-        test(`should set '${METADATA.DIRECTIVE.ID}' to '${DIRECTIVE_ID.COGNITO}' for property`, () => {
-            const id = Reflect.getMetadata(METADATA.DIRECTIVE.ID, TestType.prototype, 'prop');
-            expect(id).toBe(DIRECTIVE_ID.COGNITO);
-        });
-    });
-
-    describe('@Cognito(groups)', () => {
+    describe('@Cognito(group, groups)', () => {
+        const GROUP = getName();
         const GROUPS = getNames();
-        const GROUP_NAMES = GROUPS.join(', ');
+        const GROUP_NAMES = [GROUP, ...GROUPS].join(', ');
 
-        @Cognito(...GROUPS)
+        @Cognito(GROUP, ...GROUPS)
+        @Custom('')
         class TestType {
-            @Cognito(...GROUPS)
+            @Cognito(GROUP, ...GROUPS)
+            @Custom('')
             prop = 0;
         }
 
-        test(`should set '${METADATA.DIRECTIVE.ID}' to '${DIRECTIVE_ID.COGNITO}' for class`, () => {
-            const id = Reflect.getMetadata(METADATA.DIRECTIVE.ID, TestType);
-            expect(id).toBe(DIRECTIVE_ID.COGNITO);
+        test(`should set '${METADATA.DIRECTIVE.IDS}' to [${DIRECTIVE_ID.COGNITO}, ${DIRECTIVE_ID.CUSTOM}] for class`, () => {
+            const ids = Reflect.getMetadata(METADATA.DIRECTIVE.IDS, TestType);
+
+            expect(ids).toHaveLength(2);
+            expect(ids).toContain(DIRECTIVE_ID.COGNITO);
+            expect(ids).toContain(DIRECTIVE_ID.CUSTOM);
         });
 
-        test(`should set '${METADATA.DIRECTIVE.ID}' to '${DIRECTIVE_ID.COGNITO}' for property`, () => {
-            const id = Reflect.getMetadata(METADATA.DIRECTIVE.ID, TestType.prototype, 'prop');
-            expect(id).toBe(DIRECTIVE_ID.COGNITO);
+        test(`should set '${METADATA.DIRECTIVE.IDS}' to [${DIRECTIVE_ID.COGNITO}, ${DIRECTIVE_ID.CUSTOM}] for property`, () => {
+            const ids = Reflect.getMetadata(METADATA.DIRECTIVE.IDS, TestType.prototype, 'prop');
+
+            expect(ids).toHaveLength(2);
+            expect(ids).toContain(DIRECTIVE_ID.COGNITO);
+            expect(ids).toContain(DIRECTIVE_ID.CUSTOM);
         });
 
-        test(`should set '${METADATA.COGNITO.GROUPS}' to '${GROUP_NAMES}' for class`, () => {
-            const groups = Reflect.getMetadata(METADATA.COGNITO.GROUPS, TestType);
-            expect(groups).toEqual(GROUPS);
+        test(`should set '${METADATA.DIRECTIVE.COGNITO_GROUPS}' to [${GROUP_NAMES}] for class`, () => {
+            const groups = Reflect.getMetadata(METADATA.DIRECTIVE.COGNITO_GROUPS, TestType);
+            expect(groups).toEqual([GROUP, ...GROUPS]);
         });
 
-        test(`should set '${METADATA.COGNITO.GROUPS}' to '${GROUP_NAMES}' for property`, () => {
-            const groups = Reflect.getMetadata(METADATA.COGNITO.GROUPS, TestType.prototype, 'prop');
-            expect(groups).toEqual(GROUPS);
+        test(`should set '${METADATA.DIRECTIVE.COGNITO_GROUPS}' to [${GROUP_NAMES}] for property`, () => {
+            const groups = Reflect.getMetadata(METADATA.DIRECTIVE.COGNITO_GROUPS, TestType.prototype, 'prop');
+            expect(groups).toEqual([GROUP, ...GROUPS]);
         });
     });
 });

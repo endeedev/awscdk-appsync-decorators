@@ -24,8 +24,8 @@ describe('Decorator: Object Type', () => {
             expect(name).toBe(TestType.name);
         });
 
-        test(`should set '${METADATA.OBJECT.TYPES}' to []`, () => {
-            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestType);
+        test(`should set '${METADATA.TYPE.OBJECT_TYPES}' to []`, () => {
+            const types = Reflect.getMetadata(METADATA.TYPE.OBJECT_TYPES, TestType);
             expect(types).toEqual([]);
         });
     });
@@ -44,8 +44,8 @@ describe('Decorator: Object Type', () => {
             expect(name).toBe(TYPE_NAME);
         });
 
-        test(`should set '${METADATA.OBJECT.TYPES}' to []`, () => {
-            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestType);
+        test(`should set '${METADATA.TYPE.OBJECT_TYPES}' to []`, () => {
+            const types = Reflect.getMetadata(METADATA.TYPE.OBJECT_TYPES, TestType);
             expect(types).toEqual([]);
         });
     });
@@ -64,8 +64,8 @@ describe('Decorator: Object Type', () => {
             expect(name).toBe(TestType.name);
         });
 
-        test(`should set '${METADATA.OBJECT.TYPES}' to [${TYPE_NAMES}]`, () => {
-            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestType);
+        test(`should set '${METADATA.TYPE.OBJECT_TYPES}' to [${TYPE_NAMES}]`, () => {
+            const types = Reflect.getMetadata(METADATA.TYPE.OBJECT_TYPES, TestType);
             expect(types).toEqual([TestType1, TestType2]);
         });
     });
@@ -84,8 +84,8 @@ describe('Decorator: Object Type', () => {
             expect(name).toBe(TYPE_NAME);
         });
 
-        test(`should set '${METADATA.OBJECT.TYPES}' to [${TYPE_NAMES}]`, () => {
-            const types = Reflect.getMetadata(METADATA.OBJECT.TYPES, TestType);
+        test(`should set '${METADATA.TYPE.OBJECT_TYPES}' to [${TYPE_NAMES}]`, () => {
+            const types = Reflect.getMetadata(METADATA.TYPE.OBJECT_TYPES, TestType);
             expect(types).toEqual([TestType1, TestType2]);
         });
     });

@@ -2,6 +2,22 @@
 import { Type } from '@/common';
 import { METADATA } from '@/constants';
 
+const mergeTypeDirectives = (directiveId: string, target: Function) => {
+    const directiveIds = Reflect.hasMetadata(METADATA.DIRECTIVE.IDS, target)
+        ? Reflect.getMetadata(METADATA.DIRECTIVE.IDS, target)
+        : [];
+
+    return [...directiveIds, directiveId];
+};
+
+const mergePropertyDirectives = (directiveId: string, target: Function, propertyKey: string | symbol) => {
+    const directiveIds = Reflect.hasMetadata(METADATA.DIRECTIVE.IDS, target, propertyKey)
+        ? Reflect.getMetadata(METADATA.DIRECTIVE.IDS, target, propertyKey)
+        : [];
+
+    return [...directiveIds, directiveId];
+};
+
 export const getTypeContext = (target: Function, ...args: unknown[]) => {
     let name = target.name;
 
@@ -34,9 +50,16 @@ export const defineDirectiveMetadata = (
 
     // Define the directive id metadata - can be class or property
     if (propertyKey) {
-        Reflect.defineMetadata(METADATA.DIRECTIVE.ID, directiveId, target as Function, propertyKey as string | symbol);
+        const directiveIds = mergePropertyDirectives(directiveId, target as Function, propertyKey as string | symbol);
+        Reflect.defineMetadata(
+            METADATA.DIRECTIVE.IDS,
+            directiveIds,
+            target as Function,
+            propertyKey as string | symbol,
+        );
     } else {
-        Reflect.defineMetadata(METADATA.DIRECTIVE.ID, directiveId, target as Function);
+        const directiveIds = mergeTypeDirectives(directiveId, target as Function);
+        Reflect.defineMetadata(METADATA.DIRECTIVE.IDS, directiveIds, target as Function);
     }
 
     // If callback exists, then call it for any extra metadata needed

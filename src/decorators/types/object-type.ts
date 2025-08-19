@@ -12,6 +12,6 @@ export function ObjectType(...args: unknown[]): ClassDecorator {
 
         Reflect.defineMetadata(METADATA.TYPE.ID, TYPE_ID.OBJECT, target);
         Reflect.defineMetadata(METADATA.TYPE.NAME, name, target);
-        Reflect.defineMetadata(METADATA.OBJECT.TYPES, types, target);
+        Reflect.defineMetadata(METADATA.TYPE.OBJECT_TYPES, types, target);
     };
 }

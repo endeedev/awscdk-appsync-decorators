@@ -18,19 +18,15 @@ export const DIRECTIVE_ID = {
     IAM: 'directive:id:iam',
     LAMBDA: 'directive:id:lambda',
     OIDC: 'directive:id:oidc',
+    CUSTOM: 'directive:id:custom',
 };
 
 export const FUNCTION_TYPE = {
     JS: 'function:type:js',
     VTL: 'function:type:vtl',
-}
+};
 
 export const METADATA = {
-    // TYPES
-    TYPE: {
-        ID: 'metadata:type:id',
-        NAME: 'metadata:type:name',
-    },
     COMMON: {
         ARGS: 'metadata:args',
         LIST: 'metadata:list',
@@ -38,17 +34,15 @@ export const METADATA = {
         REQUIRED_LIST: 'metadata:required:list',
         RESOLVER_FUNCTIONS: 'metadata:resolver:functions',
     },
-    OBJECT: {
-        TYPES: 'metadata:object:types',
+    TYPE: {
+        ID: 'metadata:type:id',
+        NAME: 'metadata:type:name',
+        OBJECT_TYPES: 'metadata:type:object:types',
+        UNION_TYPES: 'metadata:type:union:types',
     },
-    UNION: {
-        TYPES: 'metadata:union:types',
-    },
-    // DIRECTIVES
     DIRECTIVE: {
-        ID: 'metadata:directive:id',
-    },
-    COGNITO: {
-        GROUPS: 'metadata:cognito:groups',
+        IDS: 'metadata:directive:ids',
+        COGNITO_GROUPS: 'metadata:directive:cognito:groups',
+        CUSTOM_STATEMENT: 'metadata:directive:custom:statement',
     },
 };

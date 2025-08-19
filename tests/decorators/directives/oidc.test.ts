@@ -1,22 +1,30 @@
 import { DIRECTIVE_ID, METADATA } from '@/constants';
-import { Oidc } from '@/decorators';
+import { Custom, Oidc } from '@/decorators';
 
 describe('Decorator: OIDC', () => {
     describe('@Oidc()', () => {
         @Oidc()
+        @Custom('')
         class TestType {
             @Oidc()
+            @Custom('')
             prop = 0;
         }
 
-        test(`should set '${METADATA.DIRECTIVE.ID}' to '${DIRECTIVE_ID.OIDC}' for class`, () => {
-            const id = Reflect.getMetadata(METADATA.DIRECTIVE.ID, TestType);
-            expect(id).toBe(DIRECTIVE_ID.OIDC);
+        test(`should set '${METADATA.DIRECTIVE.IDS}' to [${DIRECTIVE_ID.OIDC}, ${DIRECTIVE_ID.CUSTOM}] for class`, () => {
+            const ids = Reflect.getMetadata(METADATA.DIRECTIVE.IDS, TestType);
+
+            expect(ids).toHaveLength(2);
+            expect(ids).toContain(DIRECTIVE_ID.OIDC);
+            expect(ids).toContain(DIRECTIVE_ID.CUSTOM);
         });
 
-        test(`should set '${METADATA.DIRECTIVE.ID}' to '${DIRECTIVE_ID.OIDC}' for property`, () => {
-            const id = Reflect.getMetadata(METADATA.DIRECTIVE.ID, TestType.prototype, 'prop');
-            expect(id).toBe(DIRECTIVE_ID.OIDC);
+        test(`should set '${METADATA.DIRECTIVE.IDS}' to [${DIRECTIVE_ID.OIDC}, ${DIRECTIVE_ID.CUSTOM}] for property`, () => {
+            const ids = Reflect.getMetadata(METADATA.DIRECTIVE.IDS, TestType.prototype, 'prop');
+
+            expect(ids).toHaveLength(2);
+            expect(ids).toContain(DIRECTIVE_ID.OIDC);
+            expect(ids).toContain(DIRECTIVE_ID.CUSTOM);
         });
     });
 });

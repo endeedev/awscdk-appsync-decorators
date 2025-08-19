@@ -1,13 +1,13 @@
 import { Code, FunctionRuntime, MappingTemplate } from 'aws-cdk-lib/aws-appsync';
 
 import { METADATA } from '@/constants';
-import { Resolve } from '@/decorators';
+import { Resolver } from '@/decorators';
 import { JsFunction, VtlFunction } from '@/resolvers';
 
 import { getName, getTypeNames } from '../../helpers';
 
-describe('Decorator: Resolve', () => {
-    describe('@Resolve(functions)', () => {
+describe('Decorator: Resolver', () => {
+    describe('@Resolver(func, funcs)', () => {
         const DATA_SOURCE = getName();
 
         class TestJsFunction extends JsFunction {
@@ -23,7 +23,7 @@ describe('Decorator: Resolve', () => {
         }
 
         class TestType {
-            @Resolve(TestJsFunction, TestVtlFunction)
+            @Resolver(TestJsFunction, TestVtlFunction)
             prop = 0;
         }
 
