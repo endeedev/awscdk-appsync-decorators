@@ -1,5 +1,9 @@
 export const TYPE_ID = {
+    ENUM: 'type:id:enum',
+    INPUT: 'type:id:input',
+    INTERFACE: 'type:id:interface',
     OBJECT: 'type:id:object',
+    UNION: 'type:id:union',
 };
 
 export const METADATA = {
@@ -9,5 +13,8 @@ export const METADATA = {
     },
     OBJECT: {
         TYPES: 'metadata:object:types',
+    },
+    UNION: {
+        TYPES: 'metadata:union:types',
     },
 };

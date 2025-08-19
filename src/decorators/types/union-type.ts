@@ -1,10 +1,10 @@
 import { METADATA, TYPE_ID } from '@/constants';
 import { SchemaType } from '@/types';
 
-export function ObjectType(): ClassDecorator;
-export function ObjectType(...types: SchemaType<object>[]): ClassDecorator;
-export function ObjectType(name: string, ...types: SchemaType<object>[]): ClassDecorator;
-export function ObjectType(...args: unknown[]): ClassDecorator {
+export function UnionType(): ClassDecorator;
+export function UnionType(...types: SchemaType<object>[]): ClassDecorator;
+export function UnionType(name: string, ...types: SchemaType<object>[]): ClassDecorator;
+export function UnionType(...args: unknown[]): ClassDecorator {
     return (target) => {
         let typeName: string = target.name;
         let typeList: SchemaType<object>[] = [];
@@ -21,8 +21,8 @@ export function ObjectType(...args: unknown[]): ClassDecorator {
             }
         }
 
-        Reflect.defineMetadata(METADATA.TYPE.ID, TYPE_ID.OBJECT, target);
+        Reflect.defineMetadata(METADATA.TYPE.ID, TYPE_ID.UNION, target);
         Reflect.defineMetadata(METADATA.TYPE.NAME, typeName, target);
-        Reflect.defineMetadata(METADATA.OBJECT.TYPES, typeList, target);
+        Reflect.defineMetadata(METADATA.UNION.TYPES, typeList, target);
     };
 }
