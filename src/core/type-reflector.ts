@@ -28,7 +28,7 @@ export class TypeReflector {
             };
         }
 
-        // Otherwise reflect the type metadata
+        // Otherwise build the type info
         const typeId = Reflect.getMetadata(METADATA.TYPE.ID, type);
         const typeName = Reflect.getMetadata(METADATA.TYPE.NAME, type);
 
@@ -63,35 +63,31 @@ export class TypeReflector {
     }
 
     static getMetadataTypeInfos(typeInfo: TypeInfo, metadataKey: string): TypeInfo[] {
-        const { definitionType } = typeInfo;
+        const types = this.getMetadata<Type<object>[]>(metadataKey, typeInfo);
 
-        // Get the types for the provided metadata key
-        const types = Reflect.getMetadata(metadataKey, definitionType) as Type<object>[];
+        if (types) {
+            return types.map((type) => this.getTypeInfo(type));
+        }
 
-        return types.map((type) => this.getTypeInfo(type));
+        return [];
     }
 
     static getMetadataDirectiveInfos(typeInfo: TypeInfo, propertyInfo?: PropertyInfo): DirectiveInfo[] {
-        const { definitionType } = typeInfo;
+        const directiveIds = this.getMetadata<string[]>(METADATA.DIRECTIVE.IDS, typeInfo, propertyInfo);
 
-        // Get the directives for type or property
-        const directiveIds = propertyInfo
-            ? (Reflect.getMetadata(
-                  METADATA.DIRECTIVE.IDS,
-                  definitionType.prototype,
-                  propertyInfo.propertyName,
-              ) as string[])
-            : (Reflect.getMetadata(METADATA.DIRECTIVE.IDS, definitionType) as string[]);
+        if (directiveIds) {
+            return directiveIds.map((directiveId) => {
+                const factory = this._directiveFactories[directiveId];
+                const context = factory ? factory(typeInfo, propertyInfo) : undefined;
 
-        return directiveIds.map((directiveId) => {
-            const factory = this._directiveFactories[directiveId];
-            const context = factory ? factory(typeInfo, propertyInfo) : undefined;
+                return {
+                    directiveId,
+                    context,
+                };
+            });
+        }
 
-            return {
-                directiveId,
-                context,
-            };
-        });
+        return [];
     }
 
     private static getDirectiveContext(
@@ -100,33 +96,22 @@ export class TypeReflector {
         typeInfo: TypeInfo,
         propertyInfo?: PropertyInfo,
     ): Record<string, unknown> {
-        const { definitionType } = typeInfo;
-
-        // Get the context values from the type or property metadata
         if (propertyInfo) {
-            const { prototype } = definitionType;
-            const { propertyName } = propertyInfo;
-
             return {
-                [contextKey]: Reflect.getMetadata(metadataKey, prototype, propertyName),
+                [contextKey]: this.getMetadata(metadataKey, typeInfo, propertyInfo),
             };
         }
 
         return {
-            [contextKey]: Reflect.getMetadata(metadataKey, definitionType),
+            [contextKey]: this.getMetadata(metadataKey, typeInfo),
         };
     }
 
     private static getArgInfos(propertyInfo: PropertyInfo): ArgInfo[] {
-        const {
-            propertyName,
-            declaringTypeInfo: {
-                definitionType: { prototype },
-            },
-        } = propertyInfo;
+        const { declaringTypeInfo } = propertyInfo;
 
         // Get the type defined by the args decorator
-        const argsType = Reflect.getMetadata(METADATA.COMMON.ARGS, prototype, propertyName);
+        const argsType = this.getMetadata<Type<object>>(METADATA.COMMON.ARGS, declaringTypeInfo, propertyInfo);
 
         // If defined, then reflect each property of the provided args type
         const argInfos: ArgInfo[] = [];
@@ -147,6 +132,29 @@ export class TypeReflector {
         }
 
         return argInfos;
+    }
+
+    private static getMetadata<TMetadata>(
+        metadataKey: string,
+        typeInfo: TypeInfo,
+        propertyInfo?: PropertyInfo,
+    ): TMetadata | undefined {
+        const { definitionType } = typeInfo;
+
+        // First, validate the metadata has been define
+        // Otherwise an error will be thrown
+        const hasMetadata = propertyInfo
+            ? Reflect.hasMetadata(metadataKey, definitionType.prototype, propertyInfo.propertyName)
+            : Reflect.hasMetadata(metadataKey, definitionType);
+
+        // If it exists, then get it
+        if (hasMetadata) {
+            return propertyInfo
+                ? (Reflect.getMetadata(metadataKey, definitionType.prototype, propertyInfo.propertyName) as TMetadata)
+                : (Reflect.getMetadata(metadataKey, definitionType) as TMetadata);
+        }
+
+        return undefined;
     }
 
     private static reflectProperty(typeInfo: TypeInfo, name: string, value: unknown): ReflectedProperty {

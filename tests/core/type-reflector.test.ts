@@ -70,7 +70,6 @@ describe('Core: Type Reflector', () => {
 
         describe('Field', () => {
             test('should return property info', () => {
-                @ObjectType()
                 class TestType {
                     prop = Scalar.ID;
                 }
@@ -84,7 +83,6 @@ describe('Core: Type Reflector', () => {
             });
 
             test('should return isList = true when using @List() decorator', () => {
-                @ObjectType()
                 class TestType {
                     @List()
                     prop = Scalar.ID;
@@ -99,7 +97,6 @@ describe('Core: Type Reflector', () => {
             });
 
             test('should return isList = true when using @RequiredList() decorator', () => {
-                @ObjectType()
                 class TestType {
                     @RequiredList()
                     prop = Scalar.ID;
@@ -114,7 +111,6 @@ describe('Core: Type Reflector', () => {
             });
 
             test('should return isList = true when property is array', () => {
-                @ObjectType()
                 class TestType {
                     prop1 = [Scalar.ID];
                 }
@@ -128,7 +124,6 @@ describe('Core: Type Reflector', () => {
             });
 
             test('should return isRequired = true when using @Required() decorator', () => {
-                @ObjectType()
                 class TestType {
                     @Required()
                     prop = Scalar.ID;
@@ -143,7 +138,6 @@ describe('Core: Type Reflector', () => {
             });
 
             test('should return RequiredList = true when using @RequiredList() decorator', () => {
-                @ObjectType()
                 class TestType {
                     @RequiredList()
                     prop = Scalar.ID;
@@ -173,7 +167,6 @@ describe('Core: Type Reflector', () => {
                     prop = Scalar.STRING;
                 }
 
-                @ObjectType()
                 class TestType {
                     @Args(TestArgs)
                     prop = Scalar.ID;
@@ -193,7 +186,6 @@ describe('Core: Type Reflector', () => {
                     prop = Scalar.STRING;
                 }
 
-                @ObjectType()
                 class TestType {
                     @Args(TestArgs)
                     prop = Scalar.ID;
@@ -213,7 +205,6 @@ describe('Core: Type Reflector', () => {
                     prop = Scalar.STRING;
                 }
 
-                @ObjectType()
                 class TestType {
                     @Args(TestArgs)
                     prop = Scalar.ID;
@@ -232,7 +223,6 @@ describe('Core: Type Reflector', () => {
                     prop = [Scalar.STRING];
                 }
 
-                @ObjectType()
                 class TestType {
                     @Args(TestArgs)
                     prop = Scalar.ID;
@@ -252,7 +242,6 @@ describe('Core: Type Reflector', () => {
                     prop = Scalar.STRING;
                 }
 
-                @ObjectType()
                 class TestType {
                     @Args(TestArgs)
                     prop = Scalar.ID;
@@ -272,7 +261,6 @@ describe('Core: Type Reflector', () => {
                     prop = Scalar.STRING;
                 }
 
-                @ObjectType()
                 class TestType {
                     @Args(TestArgs)
                     prop = Scalar.ID;
@@ -294,7 +282,7 @@ describe('Core: Type Reflector', () => {
 
         const TYPE_INFOS = getTypeInfos(TestMetadataType1, TestMetadataType2);
 
-        test(`should return object type infos`, () => {
+        test('should return object type infos', () => {
             @ObjectType(TestMetadataType1, TestMetadataType2)
             class TestType {}
 
@@ -304,7 +292,7 @@ describe('Core: Type Reflector', () => {
             expect(typeInfos).toEqual(TYPE_INFOS);
         });
 
-        test(`should return union type infos`, () => {
+        test('should return union type infos', () => {
             @UnionType(TestMetadataType1, TestMetadataType2)
             class TestType {}
 
@@ -313,47 +301,57 @@ describe('Core: Type Reflector', () => {
 
             expect(typeInfos).toEqual(TYPE_INFOS);
         });
+
+        test('should return empty if no types', () => {
+            const METDATA_KEY = getName();
+
+            class TestType {}
+
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METDATA_KEY);
+
+            expect(typeInfos).toHaveLength(0);
+        });
     });
 
     describe('getMetadataDirectiveInfos(typeInfo, propertyInfo)', () => {
-        test(`should return directive infos for type`, () => {
-            const GROUP = getName();
-            const GROUPS = getNames();
-            const STATEMENT = getName();
+        const GROUP = getName();
+        const GROUPS = getNames();
+        const STATEMENT = getName();
+        const SCALAR = getScalar();
 
-            const assertDirective = (
-                directiveId: string,
-                directiveInfos: DirectiveInfo[],
-                context?: Record<string, unknown>,
-            ) => {
-                const directiveInfo = directiveInfos.find(({ directiveId: id }) => id === directiveId);
+        const assertDirective = (
+            directiveId: string,
+            directiveInfos: DirectiveInfo[],
+            context?: Record<string, unknown>,
+        ) => {
+            const directiveInfo = directiveInfos.find(({ directiveId: id }) => id === directiveId);
 
-                expect(directiveInfo).not.toBeUndefined();
-                expect(directiveInfo?.context).toBe(context);
-            };
+            expect(directiveInfo).not.toBeUndefined();
+            expect(directiveInfo?.context).toEqual(context);
+        };
 
+        @ApiKey()
+        @Cognito(GROUP, ...GROUPS)
+        @Custom(STATEMENT)
+        @Iam()
+        @Lambda()
+        @Oidc()
+        class TestType {
             @ApiKey()
             @Cognito(GROUP, ...GROUPS)
             @Custom(STATEMENT)
             @Iam()
             @Lambda()
             @Oidc()
-            class TestType {
-                @ApiKey()
-                @Cognito(GROUP)
-                @Custom(STATEMENT)
-                @Iam()
-                @Lambda()
-                @Oidc()
-                prop = 0;
-            }
+            prop = SCALAR;
+        }
 
+        test('should return directive infos for type', () => {
             const typeInfo = TypeReflector.getTypeInfo(TestType);
-            const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo, {
-                propertyName: 'prop',
-                returnTypeInfo: typeInfo,
-                declaringTypeInfo: typeInfo,
-            });
+            const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo);
+
+            expect(directiveInfos).toHaveLength(6);
 
             assertDirective(DIRECTIVE_ID.API_KEY, directiveInfos);
             assertDirective(DIRECTIVE_ID.IAM, directiveInfos);
@@ -367,6 +365,52 @@ describe('Core: Type Reflector', () => {
             assertDirective(DIRECTIVE_ID.CUSTOM, directiveInfos, {
                 statement: STATEMENT,
             });
+        });
+
+        test('should return directive infos for property', () => {
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo, {
+                propertyName: 'prop',
+                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
+                declaringTypeInfo: typeInfo,
+            });
+
+            expect(directiveInfos).toHaveLength(6);
+
+            assertDirective(DIRECTIVE_ID.API_KEY, directiveInfos);
+            assertDirective(DIRECTIVE_ID.IAM, directiveInfos);
+            assertDirective(DIRECTIVE_ID.LAMBDA, directiveInfos);
+            assertDirective(DIRECTIVE_ID.OIDC, directiveInfos);
+
+            assertDirective(DIRECTIVE_ID.COGNITO, directiveInfos, {
+                groups: [GROUP, ...GROUPS],
+            });
+
+            assertDirective(DIRECTIVE_ID.CUSTOM, directiveInfos, {
+                statement: STATEMENT,
+            });
+        });
+
+        test('should return empty if no directives for type', () => {
+            class TestType {}
+
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo);
+
+            expect(directiveInfos).toHaveLength(0);
+        });
+
+        test('should return empty if no directives for property', () => {
+            class TestType {}
+
+            const typeInfo = TypeReflector.getTypeInfo(TestType);
+            const directiveInfos = TypeReflector.getMetadataDirectiveInfos(typeInfo, {
+                propertyName: 'prop',
+                returnTypeInfo: TypeReflector.getTypeInfo(SCALAR),
+                declaringTypeInfo: typeInfo,
+            });
+
+            expect(directiveInfos).toHaveLength(0);
         });
     });
 });

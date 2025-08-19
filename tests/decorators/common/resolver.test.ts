@@ -12,7 +12,7 @@ describe('Decorator: Resolver', () => {
 
         class TestJsOperation extends JsOperation {
             dataSourceName = DATA_SOURCE;
-            code = Code.fromInline(`// CODE`);
+            code = Code.fromInline('// CODE');
         }
 
         class TestVtlOperation extends VtlOperation {
