@@ -1,8 +1,13 @@
 {
     "name": "awscdk-appsync-decorators",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "Decorators for creating appsync apis using aws-cdk",
     "license": "MIT",
+    "keywords": [
+        "aws",
+        "cdk",
+        "appsync"
+    ],
     "types": "dist/index.d.ts",
     "main": "dist/index.js",
     "files": [
@@ -39,7 +44,7 @@
         "tsup": "8.3.5",
         "tsx": "4.19.2",
         "typescript": "5.7.2",
-        "typescript-eslint": "8.18.2",
+        "typescript-eslint": "8.19.0",
         "yalc": "1.0.0-pre.53"
     },
     "peerDependencies": {
