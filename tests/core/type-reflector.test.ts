@@ -1,14 +1,13 @@
-import { faker } from '@faker-js/faker';
-
 import { Scalar, Type } from '@/common';
 import { METADATA, TYPE_ID } from '@/constants';
 import { TypeReflector } from '@/core';
 import { Args, List, ObjectType, Required, RequiredList, UnionType } from '@/decorators';
 
+import { getName, getScalar, getTypeInfos } from '../helpers';
+
 describe('Core: Type Reflector', () => {
     describe('getTypeInfo(scalar)', () => {
-        const SCALARS = Object.values(Scalar).filter((scalar) => scalar !== Scalar.INTERMEDIATE);
-        const SCALAR = faker.helpers.arrayElement(SCALARS);
+        const SCALAR = getScalar();
 
         test(`should return scalar info for '${SCALAR}'`, () => {
             const typeInfo = TypeReflector.getTypeInfo(SCALAR);
@@ -27,7 +26,7 @@ describe('Core: Type Reflector', () => {
     });
 
     describe('getTypeInfo(type)', () => {
-        const TYPE_NAME = faker.word.sample();
+        const TYPE_NAME = getName();
 
         @ObjectType(TYPE_NAME)
         class TestType {}
@@ -280,7 +279,7 @@ describe('Core: Type Reflector', () => {
         class TestMetadataType1 {}
         class TestMetadataType2 {}
 
-        const TYPES = [TypeReflector.getTypeInfo(TestMetadataType1), TypeReflector.getTypeInfo(TestMetadataType2)];
+        const TYPE_INFOS = getTypeInfos(TestMetadataType1, TestMetadataType2);
 
         test(`should return object type infos`, () => {
             @ObjectType(TestMetadataType1, TestMetadataType2)
@@ -289,7 +288,7 @@ describe('Core: Type Reflector', () => {
             const typeInfo = TypeReflector.getTypeInfo(TestType);
             const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METADATA.OBJECT.TYPES);
 
-            expect(typeInfos).toEqual(TYPES);
+            expect(typeInfos).toEqual(TYPE_INFOS);
         });
 
         test(`should return union type infos`, () => {
@@ -299,7 +298,7 @@ describe('Core: Type Reflector', () => {
             const typeInfo = TypeReflector.getTypeInfo(TestType);
             const typeInfos = TypeReflector.getMetadataTypeInfos(typeInfo, METADATA.UNION.TYPES);
 
-            expect(typeInfos).toEqual(TYPES);
+            expect(typeInfos).toEqual(TYPE_INFOS);
         });
     });
 });

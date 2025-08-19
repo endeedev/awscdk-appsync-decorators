@@ -1,7 +1,7 @@
 import { METADATA, TYPE_ID } from '@/constants';
 import { InputType } from '@/decorators';
 
-import { getTypeName } from '../../helpers';
+import { getName } from '../../helpers';
 
 describe('Decorator: Input Type', () => {
     describe('@InputType()', () => {
@@ -20,7 +20,7 @@ describe('Decorator: Input Type', () => {
     });
 
     describe('@InputType(name)', () => {
-        const TYPE_NAME = getTypeName();
+        const TYPE_NAME = getName();
 
         @InputType(TYPE_NAME)
         class TestType {}

@@ -1,7 +1,7 @@
 import { METADATA, TYPE_ID } from '@/constants';
 import { InterfaceType } from '@/decorators';
 
-import { getTypeName } from '../../helpers';
+import { getName } from '../../helpers';
 
 describe('Decorator: Interface Type', () => {
     describe('@InterfaceType()', () => {
@@ -20,7 +20,7 @@ describe('Decorator: Interface Type', () => {
     });
 
     describe('@InterfaceType(name)', () => {
-        const TYPE_NAME = getTypeName();
+        const TYPE_NAME = getName();
 
         @InterfaceType(TYPE_NAME)
         class TestType {}

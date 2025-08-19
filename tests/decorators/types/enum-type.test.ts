@@ -1,7 +1,7 @@
 import { METADATA, TYPE_ID } from '@/constants';
 import { EnumType } from '@/decorators';
 
-import { getTypeName } from '../../helpers';
+import { getName } from '../../helpers';
 
 describe('Decorator: Enum Type', () => {
     describe('@EnumType()', () => {
@@ -20,7 +20,7 @@ describe('Decorator: Enum Type', () => {
     });
 
     describe('@EnumType(name)', () => {
-        const TYPE_NAME = getTypeName();
+        const TYPE_NAME = getName();
 
         @EnumType(TYPE_NAME)
         class TestType {}

@@ -1,13 +1,13 @@
 import { METADATA, TYPE_ID } from '@/constants';
 import { UnionType } from '@/decorators';
 
-import { getTypeName, getTypeNames } from '../../helpers';
+import { getName, getTypeNames } from '../../helpers';
 
 describe('Decorator: Union Type', () => {
     class TestType1 {}
     class TestType2 {}
 
-    const TYPE_NAME = getTypeName();
+    const TYPE_NAME = getName();
     const TYPE_NAMES = getTypeNames(TestType1, TestType2);
 
     describe('@UnionType()', () => {

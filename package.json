@@ -4,8 +4,8 @@
     "license": "MIT",
     "scripts": {
         "playground": "tsx ./playground/main.ts",
-        "test": "jest --verbose",
-        "coverage": "jest --coverage",
+        "test": "cls && jest --verbose",
+        "coverage": "cls && jest --coverage",
         "format": "prettier \"**/*.+(ts|js|json)\" --write",
         "lint": "eslint \"**/*.+(ts|js|json)\"",
         "fix": "yarn format && yarn lint --fix"

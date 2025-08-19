@@ -9,14 +9,14 @@ describe('Decorator: API Key', () => {
             prop = 0;
         }
 
-        test(`should set '${METADATA.DIRECTIVE.ID}' to '${DIRECTIVE_ID.APIKEY}' for class`, () => {
+        test(`should set '${METADATA.DIRECTIVE.ID}' to '${DIRECTIVE_ID.API_KEY}' for class`, () => {
             const id = Reflect.getMetadata(METADATA.DIRECTIVE.ID, TestType);
-            expect(id).toBe(DIRECTIVE_ID.APIKEY);
+            expect(id).toBe(DIRECTIVE_ID.API_KEY);
         });
 
-        test(`should set '${METADATA.DIRECTIVE.ID}' to '${DIRECTIVE_ID.APIKEY}' for property`, () => {
+        test(`should set '${METADATA.DIRECTIVE.ID}' to '${DIRECTIVE_ID.API_KEY}' for property`, () => {
             const id = Reflect.getMetadata(METADATA.DIRECTIVE.ID, TestType.prototype, 'prop');
-            expect(id).toBe(DIRECTIVE_ID.APIKEY);
+            expect(id).toBe(DIRECTIVE_ID.API_KEY);
         });
     });
 });

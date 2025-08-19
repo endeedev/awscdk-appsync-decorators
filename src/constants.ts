@@ -13,12 +13,17 @@ export const TYPE_ID = {
 };
 
 export const DIRECTIVE_ID = {
-    APIKEY: 'directive:id:apikey',
+    API_KEY: 'directive:id:apikey',
     COGNITO: 'directive:id:cognito',
     IAM: 'directive:id:iam',
     LAMBDA: 'directive:id:lambda',
     OIDC: 'directive:id:oidc',
 };
+
+export const FUNCTION_TYPE = {
+    JS: 'function:type:js',
+    VTL: 'function:type:vtl',
+}
 
 export const METADATA = {
     // TYPES
@@ -31,6 +36,7 @@ export const METADATA = {
         LIST: 'metadata:list',
         REQUIRED: 'metadata:required',
         REQUIRED_LIST: 'metadata:required:list',
+        RESOLVER_FUNCTIONS: 'metadata:resolver:functions',
     },
     OBJECT: {
         TYPES: 'metadata:object:types',
@@ -45,5 +51,4 @@ export const METADATA = {
     COGNITO: {
         GROUPS: 'metadata:cognito:groups',
     },
-    // RESOLVERS
 };
