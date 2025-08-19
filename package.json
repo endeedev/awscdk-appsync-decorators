@@ -9,8 +9,8 @@
         "dist/*"
     ],
     "scripts": {
-        "dev": "yarn build && yalc publish",
-        "build": "tsup",
+        "build": "tsup && yarn version patch",
+        "build:dev": "tsup && yalc publish",
         "test": "jest --verbose",
         "coverage": "jest --coverage",
         "format": "prettier \"**/*.+(ts|js|json)\" --write",
