@@ -1,6 +1,6 @@
 {
     "name": "awscdk-appsync-decorators",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "description": "Decorators for creating appsync apis using aws-cdk",
     "license": "MIT",
     "keywords": [
@@ -8,6 +8,11 @@
         "cdk",
         "appsync"
     ],
+    "homepage": "https://github.com/endeedev/awscdk-appsync-decorators",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/endeedev/awscdk-appsync-decorators.git"
+    },
     "types": "dist/index.d.ts",
     "main": "dist/index.js",
     "files": [
