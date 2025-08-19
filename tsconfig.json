@@ -1,13 +1,26 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "rootDir": "./",
+        "baseUrl": "./",
         "target": "es2016",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "strict": true,
         "esModuleInterop": true,
-        "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
         "forceConsistentCasingInFileNames": true,
-        "skipLibCheck": true
+        "removeComments": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "skipLibCheck": true,
+        "paths": {
+            "@/*": ["./src/*"]
+        }
     },
-    "include": ["src/**/*", "playground/**/*"],
-    "exclude": ["node_modules"]
+    "include": ["./**/*"],
+    "exclude": ["./node_modules"]
 }
