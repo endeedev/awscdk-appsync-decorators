@@ -1,5 +1,5 @@
+import { Scalar } from '@/common';
 import { ObjectType } from '@/decorators';
-import { Scalar } from '@/types';
 
 @ObjectType()
 export class Category {

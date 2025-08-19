@@ -1,5 +1,5 @@
+import { Scalar } from '@/common';
 import { List, ObjectType } from '@/decorators';
-import { Scalar } from '@/types';
 
 import { Category } from './category';
 import { Measures } from './measures';

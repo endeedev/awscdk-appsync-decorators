@@ -1,7 +1,7 @@
-import { METADATA } from '../../constants';
-import { SchemaType } from '../../types';
+import { Type } from '@/common';
+import { METADATA } from '@/constants';
 
-export function Arguments(type: SchemaType<object>): PropertyDecorator {
+export function Arguments(type: Type<object>): PropertyDecorator {
     return (target, propertyKey) => {
         Reflect.defineMetadata(METADATA.COMMON.ARGUMENTS, type, target, propertyKey);
     };

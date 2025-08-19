@@ -1,5 +1,5 @@
+import { Scalar } from '@/common';
 import { Arguments, Required } from '@/decorators';
-import { Scalar } from '@/types';
 
 import { Beer } from './schema/beer';
 import { Filters } from './schema/filters';

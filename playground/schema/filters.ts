@@ -1,5 +1,5 @@
+import { Scalar } from '@/common';
 import { InputType } from '@/decorators';
-import { Scalar } from '@/types';
 
 @InputType('FiltersInput')
 export class Filters {

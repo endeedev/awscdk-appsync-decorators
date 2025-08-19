@@ -1,13 +1,13 @@
+import { Type } from '@/common';
 import { METADATA, TYPE_ID } from '@/constants';
-import { SchemaType } from '@/types';
 
 export function ObjectType(): ClassDecorator;
-export function ObjectType(...types: SchemaType<object>[]): ClassDecorator;
-export function ObjectType(name: string, ...types: SchemaType<object>[]): ClassDecorator;
+export function ObjectType(...types: Type<object>[]): ClassDecorator;
+export function ObjectType(name: string, ...types: Type<object>[]): ClassDecorator;
 export function ObjectType(...args: unknown[]): ClassDecorator {
     return (target) => {
         let typeName: string = target.name;
-        let typeList: SchemaType<object>[] = [];
+        let typeList: Type<object>[] = [];
 
         // Parse the args to extract the name and types list (if defined)
         if (args.length > 0) {
@@ -15,9 +15,9 @@ export function ObjectType(...args: unknown[]): ClassDecorator {
 
             if (typeof first === 'string') {
                 typeName = first as string;
-                typeList = others as SchemaType<object>[];
+                typeList = others as Type<object>[];
             } else {
-                typeList = args as SchemaType<object>[];
+                typeList = args as Type<object>[];
             }
         }
 

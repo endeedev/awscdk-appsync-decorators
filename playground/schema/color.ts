@@ -1,5 +1,5 @@
+import { Scalar } from '@/common';
 import { EnumType } from '@/decorators';
-import { Scalar } from '@/types';
 
 @EnumType()
 export class Color {
