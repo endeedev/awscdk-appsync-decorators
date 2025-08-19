@@ -18,7 +18,7 @@ import {
     Resolver,
     UnionType,
 } from '@/decorators';
-import { JsOperation } from '@/resolvers';
+import { JsResolver } from '@/resolvers';
 
 import { getName, getNames, getScalar, getTypeInfos } from '../helpers';
 
@@ -424,14 +424,14 @@ describe('Core: Type Reflector', () => {
         const FUNCTION1 = getName();
         const FUNCTION2 = getName();
 
-        class TestOperation extends JsOperation {
-            dataSourceName = DATA_SOURCE;
+        class TestResolver extends JsResolver {
+            dataSource = DATA_SOURCE;
             code = Code.fromInline('// CODE');
         }
 
-        test('should return resolve info', () => {
+        test('should return resolver info', () => {
             class TestType {
-                @Resolver(TestOperation, FUNCTION1, FUNCTION2)
+                @Resolver(TestResolver, FUNCTION1, FUNCTION2)
                 prop = SCALAR;
             }
 
@@ -443,7 +443,7 @@ describe('Core: Type Reflector', () => {
             });
 
             expect(resolveInfo).toEqual({
-                operation: TestOperation,
+                resolver: TestResolver,
                 functions: [FUNCTION1, FUNCTION2],
             });
         });

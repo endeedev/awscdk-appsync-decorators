@@ -10,7 +10,9 @@ import {
     TypeInfo,
 } from '@/common';
 import { DIRECTIVE_ID, METADATA, TYPE_ID } from '@/constants';
-import { OperationBase } from '@/resolvers';
+import { ResolverBase } from '@/resolvers';
+
+const SCALARS = Object.values(Scalar);
 
 type DirectiveFactory = (typeInfo: TypeInfo, propertyInfo?: PropertyInfo) => Record<string, unknown>;
 
@@ -18,8 +20,6 @@ interface ReflectedProperty {
     readonly propertyInfo: PropertyInfo;
     readonly modifierInfo: ModifierInfo;
 }
-
-const SCALARS = Object.values(Scalar);
 
 export class TypeReflector {
     private static _directiveFactories: Record<string, DirectiveFactory> = {
@@ -30,7 +30,7 @@ export class TypeReflector {
     };
 
     static getTypeInfo(type: Scalar | Type<object>): TypeInfo {
-        // Define the type info if the type is a scalar
+        // Define the type info if a scalar
         if (this.isScalar(`${type}`)) {
             return {
                 typeId: TYPE_ID.SCALAR,
@@ -39,7 +39,7 @@ export class TypeReflector {
             };
         }
 
-        // Otherwise build the type info
+        // Otherwise build the type info from the type metadata
         const typeId = Reflect.getMetadata(METADATA.TYPE.ID, type);
         const typeName = Reflect.getMetadata(METADATA.TYPE.NAME, type);
 
@@ -102,13 +102,13 @@ export class TypeReflector {
     }
 
     static getMetadataResolverInfo(typeInfo: TypeInfo, propertyInfo: PropertyInfo): ResolverInfo | undefined {
-        const operation = this.getMetadata<OperationBase>(METADATA.COMMON.RESOLVER_OPERATION, typeInfo, propertyInfo);
+        const resolver = this.getMetadata<Type<ResolverBase>>(METADATA.COMMON.RESOLVER, typeInfo, propertyInfo);
 
-        if (operation) {
+        if (resolver) {
             const functions = this.getMetadata<string[]>(METADATA.COMMON.RESOLVER_FUNCTIONS, typeInfo, propertyInfo);
             return {
-                operation,
-                functions,
+                resolver,
+                functions: functions as string[],
             };
         }
 
@@ -121,14 +121,10 @@ export class TypeReflector {
         typeInfo: TypeInfo,
         propertyInfo?: PropertyInfo,
     ): Record<string, unknown> {
-        if (propertyInfo) {
-            return {
-                [contextKey]: this.getMetadata(metadataKey, typeInfo, propertyInfo),
-            };
-        }
-
         return {
-            [contextKey]: this.getMetadata(metadataKey, typeInfo),
+            [contextKey]: propertyInfo
+                ? this.getMetadata(metadataKey, typeInfo, propertyInfo)
+                : this.getMetadata(metadataKey, typeInfo),
         };
     }
 
@@ -166,7 +162,7 @@ export class TypeReflector {
     ): TMetadata | undefined {
         const { definitionType } = typeInfo;
 
-        // First, validate the metadata has been define
+        // First, validate the metadata has been defined
         // Otherwise an error will be thrown
         const hasMetadata = propertyInfo
             ? Reflect.hasMetadata(metadataKey, definitionType.prototype, propertyInfo.propertyName)
@@ -174,9 +170,11 @@ export class TypeReflector {
 
         // If it exists, then get it
         if (hasMetadata) {
-            return propertyInfo
-                ? (Reflect.getMetadata(metadataKey, definitionType.prototype, propertyInfo.propertyName) as TMetadata)
-                : (Reflect.getMetadata(metadataKey, definitionType) as TMetadata);
+            const metadata = propertyInfo
+                ? Reflect.getMetadata(metadataKey, definitionType.prototype, propertyInfo.propertyName)
+                : Reflect.getMetadata(metadataKey, definitionType);
+
+            return metadata as TMetadata;
         }
 
         return undefined;

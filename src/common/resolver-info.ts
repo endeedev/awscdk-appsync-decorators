@@ -1,6 +1,8 @@
-import { OperationBase } from '@/resolvers';
+import { ResolverBase } from '@/resolvers';
+
+import { Type } from './type';
 
 export interface ResolverInfo {
-    readonly operation: OperationBase;
-    readonly functions?: string[];
+    readonly resolver: Type<ResolverBase>;
+    readonly functions: string[];
 }
