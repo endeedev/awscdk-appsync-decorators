@@ -7,7 +7,7 @@ describe('Resolvers: JS Operation', () => {
     describe('constructor()', () => {
         class TestOperation extends JsOperation {
             dataSourceName = '';
-            code = Code.fromInline('');
+            code = Code.fromInline('// CODE');
         }
 
         test(`should set runtime to '${RESOLVER_RUNTIME.JS}'`, () => {

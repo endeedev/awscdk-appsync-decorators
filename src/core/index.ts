@@ -1,3 +1,3 @@
-export * from './schema-builder';
-export * from './type-factory';
+export * from './schema-binder';
 export * from './type-reflector';
+export * from './type-store';
