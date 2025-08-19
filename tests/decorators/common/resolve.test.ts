@@ -2,7 +2,7 @@ import { Code, FunctionRuntime, MappingTemplate } from 'aws-cdk-lib/aws-appsync'
 
 import { METADATA } from '@/constants';
 import { Resolve } from '@/decorators';
-import { JsFunction, VtlFunction } from '@/functions';
+import { JsFunction, VtlFunction } from '@/resolvers';
 
 import { getName, getTypeNames } from '../../helpers';
 
@@ -13,7 +13,7 @@ describe('Decorator: Resolve', () => {
         class TestJsFunction extends JsFunction {
             dataSourceName = DATA_SOURCE;
             runtime = FunctionRuntime.JS_1_0_0;
-            code = Code.fromInline(`console.log('CODE');`);
+            code = Code.fromInline(`// CODE`);
         }
 
         class TestVtlFunction extends VtlFunction {

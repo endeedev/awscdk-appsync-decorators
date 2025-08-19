@@ -47,8 +47,8 @@ describe('Decorator: Cognito', () => {
             expect(groups).toEqual(GROUPS);
         });
 
-        test(`should set '${METADATA.COGNITO.GROUPS}' to '${GROUP_NAMES}' for class`, () => {
-            const groups = Reflect.getMetadata(METADATA.COGNITO.GROUPS, TestType);
+        test(`should set '${METADATA.COGNITO.GROUPS}' to '${GROUP_NAMES}' for property`, () => {
+            const groups = Reflect.getMetadata(METADATA.COGNITO.GROUPS, TestType.prototype, 'prop');
             expect(groups).toEqual(GROUPS);
         });
     });

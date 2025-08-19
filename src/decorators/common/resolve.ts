@@ -1,6 +1,6 @@
 import { Type } from "@/common";
 import { METADATA } from "@/constants";
-import { FunctionBase } from "@/functions";
+import { FunctionBase } from "@/resolvers";
 
 export function Resolve(...functions: Type<FunctionBase>[]): PropertyDecorator {
     return (target, propertyKey) => {        
