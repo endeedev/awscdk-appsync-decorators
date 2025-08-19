@@ -1,3 +1,13 @@
+import { Stack } from 'aws-cdk-lib';
+import {
+    AppsyncFunction,
+    BaseDataSource,
+    Code,
+    FunctionRuntime,
+    GraphqlApi,
+    MappingTemplate,
+    NoneDataSource,
+} from 'aws-cdk-lib/aws-appsync';
 import {
     CodeFirstSchema,
     Directive,
@@ -12,7 +22,7 @@ import {
 } from 'awscdk-appsync-utils';
 
 import { Scalar, Type } from '@/common';
-import { LAMBDA_DIRECTIVE_STATEMENT, METADATA } from '@/constants';
+import { LAMBDA_DIRECTIVE_STATEMENT, METADATA, TYPE_NAME } from '@/constants';
 import { SchemaBinder } from '@/core';
 import {
     ApiKey,
@@ -28,8 +38,10 @@ import {
     ObjectType,
     Oidc,
     Required,
+    Resolver,
     UnionType,
 } from '@/decorators';
+import { JsResolver, VtlResolver } from '@/resolvers';
 
 import { getName } from '../helpers';
 
@@ -220,7 +232,6 @@ describe('Core: Schema Binder', () => {
                                 isList: true,
                                 isRequired: true,
                             }),
-                            args: undefined,
                         }),
                     },
                     directives: [],
@@ -255,7 +266,6 @@ describe('Core: Schema Binder', () => {
                                 isList: true,
                                 isRequired: true,
                             }),
-                            args: undefined,
                         }),
                     },
                     directives: [],
@@ -316,7 +326,6 @@ describe('Core: Schema Binder', () => {
                                 prop: new ResolvableField({
                                     directives: [],
                                     returnType: GraphqlType.string(),
-                                    args: undefined,
                                 }),
                             },
                             directives: [],
@@ -358,11 +367,9 @@ describe('Core: Schema Binder', () => {
                                         isList: true,
                                         isRequired: true,
                                     }),
-                                    args: undefined,
                                 }),
                             },
                             directives: [],
-                            interfaceTypes: undefined,
                         }),
                     ],
                 }),
@@ -417,6 +424,181 @@ describe('Core: Schema Binder', () => {
 
             // Query, Mutation and TestInterface
             expect(addTypeSpy).toHaveBeenCalledTimes(3);
+        });
+    });
+
+    describe('Resolvers', () => {
+        const DATA_SOURCE = getName();
+        const FUNCTION = getName();
+        const CODE = Code.fromInline('// CODE');
+
+        class TestJsResolver extends JsResolver {
+            dataSource = DATA_SOURCE;
+            code = CODE;
+        }
+
+        const assertResolver = (
+            query: Type<object>,
+            assert: (
+                context: ReturnType<typeof createContext>,
+                dataSource: BaseDataSource,
+                appSyncFunction: AppsyncFunction,
+            ) => void,
+        ) => {
+            const context = createContext((binder) => {
+                binder.addQuery(query);
+            });
+
+            const { binder } = context;
+
+            const stack = new Stack();
+            const api = new GraphqlApi(stack, 'TestApi', {
+                name: 'TestApi',
+                definition: {
+                    schema: binder.schema,
+                },
+            });
+
+            const dataSource = new NoneDataSource(stack, 'TestDataSource', {
+                api,
+                name: DATA_SOURCE,
+            });
+
+            const appSyncFunction = new AppsyncFunction(stack, 'TestFunction', {
+                api,
+                name: FUNCTION,
+                dataSource,
+            });
+
+            assert(context, dataSource, appSyncFunction);
+        };
+
+        test('should create js resolvable field', () => {
+            class Query {
+                @Resolver(TestJsResolver)
+                prop = Scalar.STRING;
+            }
+
+            assertResolver(Query, ({ binder, addTypeSpy }, dataSource) => {
+                binder.bindSchema({
+                    dataSources: {
+                        [DATA_SOURCE]: dataSource,
+                    },
+                });
+
+                expect(addTypeSpy).toHaveBeenCalledWith(
+                    new SchemaObjectType(TYPE_NAME.QUERY, {
+                        definition: {
+                            prop: new ResolvableField({
+                                directives: [],
+                                returnType: GraphqlType.string(),
+                                dataSource: dataSource,
+                                code: CODE,
+                                runtime: FunctionRuntime.JS_1_0_0,
+                            }),
+                        },
+                    }),
+                );
+            });
+        });
+
+        test('should create vtl resolvable field', () => {
+            const REQUEST = MappingTemplate.fromString('# REQUEST');
+            const RESPONSE = MappingTemplate.fromString('# REQUEST');
+
+            class TestVtlResolver extends VtlResolver {
+                dataSource = DATA_SOURCE;
+                requestMappingTemplate = REQUEST;
+                responseMappingTemplate = RESPONSE;
+            }
+
+            class Query {
+                @Resolver(TestVtlResolver)
+                prop = Scalar.STRING;
+            }
+
+            assertResolver(Query, ({ binder, addTypeSpy }, dataSource) => {
+                binder.bindSchema({
+                    dataSources: {
+                        [DATA_SOURCE]: dataSource,
+                    },
+                });
+
+                expect(addTypeSpy).toHaveBeenCalledWith(
+                    new SchemaObjectType(TYPE_NAME.QUERY, {
+                        definition: {
+                            prop: new ResolvableField({
+                                directives: [],
+                                returnType: GraphqlType.string(),
+                                dataSource: dataSource,
+                                requestMappingTemplate: REQUEST,
+                                responseMappingTemplate: RESPONSE,
+                            }),
+                        },
+                    }),
+                );
+            });
+        });
+
+        test('should create resolvable field with pipeline', () => {
+            class Query {
+                @Resolver(TestJsResolver, FUNCTION)
+                prop = Scalar.STRING;
+            }
+
+            assertResolver(Query, ({ binder, addTypeSpy }, dataSource, appSyncFunction) => {
+                binder.bindSchema({
+                    dataSources: {
+                        [DATA_SOURCE]: dataSource,
+                    },
+                    functions: {
+                        [FUNCTION]: appSyncFunction,
+                    },
+                });
+
+                expect(addTypeSpy).toHaveBeenCalledWith(
+                    new SchemaObjectType(TYPE_NAME.QUERY, {
+                        definition: {
+                            prop: new ResolvableField({
+                                directives: [],
+                                returnType: GraphqlType.string(),
+                                dataSource: dataSource,
+                                code: CODE,
+                                runtime: FunctionRuntime.JS_1_0_0,
+                                pipelineConfig: [appSyncFunction],
+                            }),
+                        },
+                    }),
+                );
+            });
+        });
+
+        test('should throw if data source is not found', () => {
+            class Query {
+                @Resolver(TestJsResolver)
+                prop = Scalar.STRING;
+            }
+
+            assertResolver(Query, ({ binder }) => {
+                expect(() => binder.bindSchema()).toThrow(new Error(`Unable to find data source '${DATA_SOURCE}'.`));
+            });
+        });
+
+        test('should throw if function is not found', () => {
+            class Query {
+                @Resolver(TestJsResolver, FUNCTION)
+                prop = Scalar.STRING;
+            }
+
+            assertResolver(Query, ({ binder }, dataSource) => {
+                expect(() =>
+                    binder.bindSchema({
+                        dataSources: {
+                            [DATA_SOURCE]: dataSource,
+                        },
+                    }),
+                ).toThrow(new Error(`Unable to find function '${FUNCTION}'.`));
+            });
         });
     });
 });

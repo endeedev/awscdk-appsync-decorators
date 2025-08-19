@@ -1,25 +1,46 @@
-import { ISchema } from 'aws-cdk-lib/aws-appsync';
+import { AppsyncFunction, BaseDataSource, FunctionRuntime, ISchema } from 'aws-cdk-lib/aws-appsync';
 import {
     CodeFirstSchema,
     Directive,
     EnumType,
+    Field,
+    FieldOptions,
     IIntermediateType,
     InputType,
     InterfaceType,
     ObjectType,
     ResolvableField,
+    ResolvableFieldOptions,
     Type as TypeBase,
     UnionType,
 } from 'awscdk-appsync-utils';
 
-import { ArgInfo, DirectiveInfo, GraphqlType, ModifierInfo, PropertyInfo, Type, TypeInfo } from '@/common';
-import { DIRECTIVE_ID, LAMBDA_DIRECTIVE_STATEMENT, METADATA, TYPE_ID } from '@/constants';
+import {
+    ArgInfo,
+    DirectiveInfo,
+    GraphqlType,
+    ModifierInfo,
+    PropertyInfo,
+    ResolverInfo,
+    Type,
+    TypeInfo,
+} from '@/common';
+import { DIRECTIVE_ID, LAMBDA_DIRECTIVE_STATEMENT, METADATA, RESOLVER_RUNTIME, TYPE_ID, TYPE_NAME } from '@/constants';
+import { JsResolver, VtlResolver } from '@/resolvers';
 
 import { TypeReflector } from './type-reflector';
 import { TypeStore } from './type-store';
 
 type DirectiveFactory = (context: DirectiveInfo['context']) => Directive;
 type IntermediateTypeFactory = (typeInfo: TypeInfo) => IIntermediateType;
+
+type DataSources = Readonly<Record<string, BaseDataSource>>;
+type Functions = Readonly<Record<string, AppsyncFunction>>;
+
+interface SchemaBindOptions {
+    readonly dataSources?: DataSources;
+    readonly functions?: Functions;
+}
 
 export class SchemaBinder {
     private _schema: CodeFirstSchema;
@@ -69,14 +90,17 @@ export class SchemaBinder {
         this._mutation = mutation;
     }
 
-    bindSchema(): void {
+    bindSchema(options?: SchemaBindOptions): void {
         // Add the query type
         if (this._query) {
-            const fields = this.createFields({
-                typeId: TYPE_ID.QUERY,
-                typeName: 'Query',
-                definitionType: this._query as Type<object>,
-            });
+            const fields = this.createFields(
+                {
+                    typeId: TYPE_ID.QUERY,
+                    typeName: TYPE_NAME.QUERY,
+                    definitionType: this._query as Type<object>,
+                },
+                options,
+            );
 
             for (const [name, field] of Object.entries(fields)) {
                 this._schema.addQuery(name, field);
@@ -85,11 +109,14 @@ export class SchemaBinder {
 
         // Add the mutation type
         if (this._mutation) {
-            const fields = this.createFields({
-                typeId: TYPE_ID.MUTATION,
-                typeName: 'Mutation',
-                definitionType: this._mutation as Type<object>,
-            });
+            const fields = this.createFields(
+                {
+                    typeId: TYPE_ID.MUTATION,
+                    typeName: TYPE_NAME.MUTATION,
+                    definitionType: this._mutation as Type<object>,
+                },
+                options,
+            );
 
             for (const [name, field] of Object.entries(fields)) {
                 this._schema.addMutation(name, field);
@@ -97,10 +124,13 @@ export class SchemaBinder {
         }
     }
 
-    private createFields(typeInfo: TypeInfo): Record<string, ResolvableField> {
+    private createFields(typeInfo: TypeInfo, options?: SchemaBindOptions): Record<string, Field> {
         const fieldInfos = TypeReflector.getFieldInfos(typeInfo);
 
-        // Create resolvable fields for the type field infos
+        const dataSources = options?.dataSources ?? {};
+        const functions = options?.functions ?? {};
+
+        // Create the fields for the type field infos
         return fieldInfos.reduce((output, { propertyInfo, modifierInfo, argInfos }) => {
             const { propertyName, returnTypeInfo } = propertyInfo;
 
@@ -108,13 +138,21 @@ export class SchemaBinder {
             const returnType = this.createType(returnTypeInfo, modifierInfo);
             const args = this.createArgs(argInfos);
 
+            const fieldOptions: FieldOptions = {
+                directives,
+                returnType,
+                args,
+            };
+
+            // If resolve info is found then a resolvable field is needed
+            // Else return a standard field - cannot be a resolvable field otherwise an empty cdk resolver is generated
+            const resolverInfo = TypeReflector.getMetadataResolverInfo(typeInfo, propertyInfo);
+
             return {
                 ...output,
-                [propertyName]: new ResolvableField({
-                    directives,
-                    returnType,
-                    args,
-                }),
+                [propertyName]: resolverInfo
+                    ? this.createResolvableField(fieldOptions, resolverInfo, dataSources, functions)
+                    : new Field(fieldOptions),
             };
         }, {});
     }
@@ -191,6 +229,76 @@ export class SchemaBinder {
             }),
             {},
         );
+    }
+
+    private createResolvableField(
+        fieldOptions: FieldOptions,
+        resolverInfo: ResolverInfo,
+        dataSources: DataSources,
+        functions: Functions,
+    ): ResolvableField {
+        const { resolverType } = resolverInfo;
+
+        const instance = new resolverType();
+
+        // Match the data source for the resolver
+        const { dataSource: dataSourceName } = instance;
+
+        const dataSource = dataSources[dataSourceName];
+
+        if (!dataSource) {
+            throw new Error(`Unable to find data source '${dataSourceName}'.`);
+        }
+
+        let resolvableFieldOptions: ResolvableFieldOptions = {
+            ...fieldOptions,
+            dataSource,
+        };
+
+        // Determine the resolver operation type and add the props
+        const { runtime } = instance;
+
+        if (runtime === RESOLVER_RUNTIME.JS) {
+            const { code } = instance as JsResolver;
+            resolvableFieldOptions = {
+                ...resolvableFieldOptions,
+                code,
+                runtime: FunctionRuntime.JS_1_0_0,
+            };
+        }
+
+        if (runtime === RESOLVER_RUNTIME.VTL) {
+            const { requestMappingTemplate, responseMappingTemplate } = instance as VtlResolver;
+            resolvableFieldOptions = {
+                ...resolvableFieldOptions,
+                requestMappingTemplate,
+                responseMappingTemplate,
+            };
+        }
+
+        // If any functions are defined, then add them as well
+        const { functions: functionNames } = resolverInfo;
+
+        if (functionNames.length > 0) {
+            const pipelineConfig: AppsyncFunction[] = [];
+
+            for (const functionName of functionNames) {
+                const match = functions[functionName];
+
+                if (!match) {
+                    throw new Error(`Unable to find function '${functionName}'.`);
+                }
+
+                pipelineConfig.push(match);
+            }
+
+            resolvableFieldOptions = {
+                ...resolvableFieldOptions,
+                pipelineConfig,
+            };
+        }
+
+        return new ResolvableField(resolvableFieldOptions);
     }
 
     // #region Directive Factories

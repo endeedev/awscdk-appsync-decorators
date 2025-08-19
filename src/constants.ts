@@ -23,6 +23,11 @@ export const DIRECTIVE_ID = {
     CUSTOM: 'directive:id:custom',
 };
 
+export const TYPE_NAME = {
+    QUERY: 'Query',
+    MUTATION: 'Mutation',
+};
+
 export const RESOLVER_RUNTIME = {
     JS: 'resolver:runtime:js',
     VTL: 'resolver:runtime:vtl',
